@@ -1,0 +1,474 @@
+#Milling {
+	width: 1208px;
+	height: 665px;
+	background-image: url("../img/milling-background-texture.png");
+	background-size: cover;
+	margin: 0px 0px 0px 0px;
+	border: 0px;
+	padding: 0px 0px 0px 0px;
+}
+
+#Modal {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 1208px;
+	height: 665px;
+	cursor: default;
+	z-index: 100;
+	display: block;
+}
+
+.hidden {
+  visibility: hidden;
+  display: none;
+}
+
+#BackToMain {
+	position: absolute;
+	top: 75px;
+	left: 13px;
+	height: 16px;
+	cursor: pointer;
+}
+
+/* STEPS - Begin */
+#Steps {
+	position: absolute;
+	top: 113px;
+	left: 11px;
+}
+
+#stepsList {
+	background-color: black;
+	min-height: 500px;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+}
+
+#stepsList option{
+	padding-top: 10px;
+	height: 25px;
+	background-color: black;
+	border: 0px;
+	
+	font-family: Arial;
+	opacity: 0.87;
+	font-size: 15px;
+	color: #9f9f9f; /* selected: color: #069076;*/
+}
+
+#stepsList option:hover,
+option:active,
+option:after{
+	background-color: black;
+	color: #069076;
+}
+
+#stepsList::-webkit-scrollbar {
+    width: 5px;
+	background-color: black;
+}
+
+#stepsList::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px #8c8c8c;/*rgba(0,0,0,0.3); */
+    border-radius: 10px;
+}
+ 
+#stepsList::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px #8d8d8d;/*rgba(0,0,0,0.5); */
+}
+
+#StepCount {
+	position: absolute;
+	top: 630px;
+	left: 150px;
+	
+	font-family: Arial;
+	opacity: 0.87;
+	font-size: 15px;
+	color: #9f9f9f;
+}
+/* STEPS - End */
+
+#MiddleSection {
+    position: absolute;
+    top: 70px;
+    left: 270px;
+    width: 400px;
+    height: 560px;
+}
+
+#Title {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 400px;
+    height: 25px;
+    color: white;
+    font-size: 18px;
+    line-height: 25px;
+    font-weight: bold;
+}
+
+#Description {
+	position: absolute;
+	top: 40px;
+	left: 0px;
+	width: 400px;
+	height: 340px;
+	
+	opacity: 0.87;
+	font-family: Arial;
+	font-size: 15px;
+	color: white;
+}
+
+#Warning {
+	position: absolute;
+	top: 338px;
+	left: 67px;
+	width: 218px;
+	height: 33px;
+	
+	object-fit: contain;
+	font-family: Arial;
+	font-size: 15px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	letter-spacing: normal;
+	text-align: center;
+	color: #ff445a;
+}
+
+#Next {
+	position: absolute;
+	top: 390px;
+	left: 130px;
+	width: 90px;
+}
+
+#Next:hover {
+    content: url('../img/next_hover.png');
+	cursor: pointer;
+}
+
+.ToggledOn {
+	background-color: #069076;
+}
+
+.ToggledOff {
+	background-color: #5d5d5d;
+	cursor: pointer;
+}
+
+#ImageButton {
+	position: absolute;
+	top: 110px;
+	left: 835px;
+	width: 100px;
+	height: 18px;
+	
+	font-family: Arial;
+	font-size: 12px;
+	line-height: 18px;
+	color: white;
+	text-align: center;
+	padding: 0px;
+	margin: 0px;
+	border: 0px;
+}
+
+#RawButton {
+	position: absolute;
+	top: 110px;
+	left: 935px;
+	width: 100px;
+	height: 18px;
+	
+	font-family: Arial;
+	font-size: 12px;
+	line-height: 18px;
+	color: white;
+	text-align: center;
+	padding: 0px;
+	margin: 0px;
+	border: 0px;
+	
+	cursor: pointer;
+}
+
+#Image {
+	position: absolute;
+	top: 160px;
+	left: 690px;
+	width: 490px;
+}
+
+#GCode {
+	position: absolute;
+	top: 150px;
+	left: 690px;
+	width: 490px;
+	height: 470px;
+	
+	background-color: black;
+	color: white;
+	font-size: 13px;
+	white-space: nowrap;
+	overflow: auto;
+}
+
+
+#GCode::-webkit-scrollbar {
+    width: 10px;
+	background-color: black;
+}
+
+#GCode::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px #8c8c8c;/*rgba(0,0,0,0.3); */
+    border-radius: 10px;
+}
+ 
+#GCode::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px #8d8d8d;/*rgba(0,0,0,0.5); */
+}
+
+/* MILLING STATUS - Start */
+#OperationPercentage {
+	position: absolute;
+	left: 20px;
+	top: 187px;
+	width: 300px;
+	height: 33px;
+	
+	font-family: BebasNeue;
+	font-size: 32px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: 32px;
+	letter-spacing: normal;
+	text-align: center;
+	color: #ffffff;
+}
+
+#ProgressBar {
+	position: absolute;
+	left: 20px;
+	top: 230px;
+	width: 300px;
+	height: 16px;
+	background-color: #000000;
+}
+
+#ProgressBarGreen {
+	width: 1%;
+	height: 16px;
+	background-color: #069076;
+}
+
+#FeedRateOverride {
+	position: absolute;
+	left: 20px;
+	top: 260px;
+	width: 300px;
+	height: 20px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	
+    -webkit-appearance: none;
+    appearance: none;
+    background: #d3d3d3;
+    outline: none;
+}
+
+#FeedRateOverride::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 20px;
+    background: #069076;
+    cursor: pointer;
+}
+
+#Stop {
+	position: absolute;
+	top: 305px;
+	left: 137px;
+	width: 60px;
+	cursor: pointer;
+}
+
+#StopText {
+	position: absolute;
+	top: 326px;
+	left: 137px;
+	width: 60px;
+	
+	font-family: BebasNeue;
+	font-size: 18px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: 18px;
+	letter-spacing: normal;
+	text-align: center;
+	color: #ffffff;
+	cursor: pointer;
+}
+/* MILLING STATUS - End */
+
+/* START MILLING DIALOG - Start */
+#StartMillingDialog {
+	position: absolute;
+	top: 216px;
+	left: 343px;
+	width: 491px;
+	height: 234px;
+	
+	background-color: black;
+	border: solid 1px #969696;
+	z-index: 1000;
+	overflow:hidden;
+}
+
+@font-face {
+    font-family: BebasNeue;
+    src: url("../fonts/BebasNeue-Regular.otf") format("opentype");
+}
+
+#StartMillingTitle {
+	position: absolute;
+	top: 29px;
+	left: 185px;
+	width: 120px;
+	height: 54px;
+	
+	font-family: BebasNeue;
+	font-size: 22px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	text-align: center;
+	color: #ffffff;
+}
+
+#StartMillingDescription {
+	position: absolute;
+	top: 86.5px;
+	left: 55.5px;
+	width: 381px;
+	height: 38px;
+	
+	opacity: 0.87;
+	font-family: Arial;
+	font-size: 17px;
+	text-align: center;
+	color: #ffffff;
+}
+
+#StartMillingCancelButton {
+	position: absolute;
+	top: 157.5px;
+	left: 128.5px;
+	width: 93.5px;
+	height: 35px;
+	
+	cursor: pointer;
+	background-color: #dddddd;
+	font-family: BebasNeue;
+	font-size: 18px;
+	line-height: 35px;
+	text-align: center;
+	color: #212121;
+}
+
+#StartMillingStartButton {
+	position: absolute;
+	top: 157.5px;
+	left: 246.5px;
+	width: 116px;
+	height: 35px;
+	
+	cursor: pointer;
+	background-color: #069076;
+	font-family: BebasNeue;
+	font-size: 18px;
+	line-height: 35px;
+	text-align: center;
+	color: #ffffff;
+}
+/* START MILLING DIALOG - End */
+
+/* OPERATION COMPLETE - Start */
+#FinishedTitle {
+	position: absolute;
+	top: 163px;
+	left: 441px;
+	width: 515px;
+	height: 34px;
+	
+	font-family: BebasNeue;
+	font-size: 28px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: 28px;
+	letter-spacing: normal;
+	text-align: center;
+	color: #ffffff;
+}
+
+#PleaseSelect {
+	position: absolute;
+	top: 211px;
+	left: 520px;
+	width: 356px;
+	height: 21px;
+	
+	font-family: Arial;
+	font-size: 18px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: 18px;
+	letter-spacing: normal;
+	text-align: center;
+	color: #ffffff;
+}
+
+#Restart {
+	position: absolute;
+	left: 314px;
+	top: 285px;
+	width: 196px;
+	height: 92px;
+	cursor: pointer;
+}
+
+#Open {
+	position: absolute;
+	left: 650px;
+	top: 285px;
+	width: 121px;
+	height: 92px;
+	cursor: pointer;
+}
+
+#Back {
+	position: absolute;
+	left: 958px;
+	top: 285px;
+	width: 125px;
+	height: 92px;
+	cursor: pointer;
+}
+/* OPERATION COMPLETE - End */

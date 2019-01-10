@@ -1,0 +1,155 @@
+body {
+	border: 0px;
+	margin: 0px 0px 0px 0px;
+	padding: 0px 0px 0px 0px;
+	overflow-x: hidden;
+	overflow-y: hidden;
+}
+
+@font-face {
+    font-family: BebasNeue;
+    src: url("../fonts/BebasNeue-Regular.otf") format("opentype");
+}
+
+.hidden {
+    visibility: hidden;
+    display: none;
+}
+
+#Title {
+    position: absolute;
+    top: 73px;
+    left: 70px;
+    width: 515px;
+    height: 45px;
+    font-family: BebasNeue;
+    font-size: 37px;
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: normal;
+    letter-spacing: -0.2px;
+    text-align: left;
+    color: #9f9f9f;
+}
+
+#Error {
+    position: absolute;
+    top: 122px;
+    left: 70px;
+    width: 515px;
+    height: 42px;
+    font-family: BebasNeue;
+    font-size: 18px;
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: normal;
+    letter-spacing: -0.2px;
+    text-align: left;
+    color: #ec1c24;
+}
+
+#EmailLabel {
+	position: absolute;
+	top: 168px;
+	left: 70px;
+	width: 135px;
+	height: 17px;
+	font-family: Arial;
+	font-size: 15px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	letter-spacing: -0.2px;
+	text-align: left;
+	color: #ffffff;
+}
+
+#Email {
+	position: absolute;
+	top: 195px;
+	left: 70px;
+	width: 290px;
+	height: 36px;
+	background-color: #d7d7d7;
+	border: solid 1px #969696;
+}
+
+#Description {
+	position: absolute;
+	top: 242px;
+	left: 70px;
+	width: 515px;
+	height: 110px;
+	background-color: #d7d7d7;
+	border: solid 1px #969696;
+}
+
+#IncludeLogs {
+	position: absolute;
+	top: 363px;
+	left: 70px;
+	width: 20px;
+	height: 20px;
+	background-color: #ffffff;
+	color: #069076;
+}
+
+#IncludeLogsLabel {
+	position:absolute;
+	top: 368px;
+	left: 99px;
+	font-family: Arial;
+	font-size: 13px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	letter-spacing: -0.2px;
+	text-align: left;
+	color: #9f9f9f;
+}
+
+#CancelButton {
+	position: absolute;
+	top: 435px;
+	left: 350px;
+	width: 94px;
+	height: 35px;
+	background-color: #dddddd;
+	cursor: pointer;
+	
+	font-family: BebasNeue;
+	font-size: 18px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	letter-spacing: normal;
+	text-align: center;
+	line-height: 35px;
+	color: #212121;
+}
+
+#SendReportButton {
+	position: absolute;
+	top: 435px;
+	left: 467px;
+	width: 116px;
+	height: 35px;
+	background-color: #069076;
+	cursor: pointer;
+	
+	font-family: BebasNeue;
+	font-size: 18px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	letter-spacing: normal;
+	text-align: center;
+	line-height: 35px;
+	color: #ffffff;
+}

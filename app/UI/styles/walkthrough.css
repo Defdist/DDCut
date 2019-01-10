@@ -1,0 +1,40 @@
+@font-face {
+    font-family: BebasNeue;
+    src: url("../fonts/BebasNeue-Regular.otf") format("opentype");
+}
+
+.WalkthroughButton {
+    position: relative;
+    top: 10px;
+    width: 116px;
+    height: 25px;
+    background-color: #069076;
+    cursor: pointer;
+    font-family: BebasNeue;
+    font-size: 14px;
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: 40px;
+    letter-spacing: normal;
+    text-align: center;
+    color: #ffffff;
+    padding: 0.3em 0.8em;
+    margin: 2px;
+}
+
+.WalkthroughHighlight {
+    background-color: rgba(255,255,255,.2);
+}
+
+.WalkthroughTooltip {
+    font-size: 14px;
+    color: #ffffff;
+    background-color: #151515;
+    border: 2px outset;
+}
+
+/*.introjs-prevbutton {
+    visibility: hidden;
+    display: none;
+}*/

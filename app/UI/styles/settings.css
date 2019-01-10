@@ -1,0 +1,291 @@
+body {
+	border: 0px;
+	margin: 0px 0px 0px 0px;
+	padding: 0px 0px 0px 0px;
+	overflow-x: hidden;
+	overflow-y: hidden;
+}
+
+@font-face {
+    font-family: BebasNeue;
+    src: url("../fonts/BebasNeue-Regular.otf") format("opentype");
+}
+
+.Clickable {
+    cursor: pointer;
+}
+
+#Title {
+  position: absolute;
+  top: 7px;
+  left: 210px;
+
+  width: 104px;
+  height: 17px;
+  font-family: Arial;
+  font-size: 15px;
+  font-weight: normal;
+  font-style: normal;
+  font-stretch: normal;
+  line-height: normal;
+  letter-spacing: 0.7px;
+  text-align: center;
+  color: #ffffff;
+}
+
+#Pause {
+	position: absolute;
+	top: 76px;
+	left: 29px;
+	
+	padding: 0px;
+	margin: 0px;
+	border: 0px;
+	width: 20px;
+	height: 20px;
+	background-color: #ffffff;
+}
+
+#PauseLabel {
+	position: absolute;
+	top: 76px;
+	left: 58px;
+	
+	width: 135px;
+	height: 16px;
+	font-family: Arial;
+	font-size: 15px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	color: #9f9f9f;
+}
+
+#Timeout {
+	position: absolute;
+	top: 111px;
+	left: 29px;
+	
+	padding: 0px;
+	margin: 0px;
+	width: 60px;
+	height: 36px;
+	background-color: #ffffff;
+	border: solid 1px #979797;
+}
+
+#TimeoutLabel {
+	position: absolute;
+	top: 121px;
+	left: 94px;
+	
+	width: 250px;
+	height: 16px;
+	font-family: Arial;
+	font-size: 15px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	color: #9f9f9f;
+}
+
+#FirmwareVersionLabel {
+	position: absolute;
+	top: 190px;
+	left: 29px;
+	
+	width: 150px;
+	height: 16px;
+	font-family: Arial;
+	font-size: 15px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	color: #ffffff;
+}
+
+.RedText {
+	color: #ec1c24;
+}
+
+.WhiteText {
+	color: white;
+}
+
+#FirmwareVersion {
+	position: absolute;
+	top: 190px;
+	left: 150px;
+	
+	width: 350px;
+	height: 16px;
+	font-family: Arial;
+	font-size: 15px;
+	font-weight: bold;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+}
+
+#UpdateFirmware {
+	position: absolute;
+	top: 221px;
+	left: 29px;
+	width: 465px;
+	height: 25px;
+	
+	background-color: #069076;
+	font-family: Arial;
+	font-size: 14px;
+	line-height: 25px;
+	text-align: center;
+	color: #ffffff;
+}
+
+/* FEEDRATE - Start */
+#EnableFeedrate {
+	position: absolute;
+	top: 290px;
+	left: 29px;
+	
+	padding: 0px;
+	margin: 0px;
+	border: 0px;
+	width: 20px;
+	height: 20px;
+}
+
+#EnableFeedrateLabel {
+	position: absolute;
+	top: 291px;
+	left: 58px;
+	
+	font-family: Arial;
+	font-size: 15px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	color: #9f9f9f;
+}
+
+.Border {
+  width: 465px;
+  height: 100px;
+  position: absolute;
+  top: 343px;
+  left: 29px;
+  border-radius: 4px;
+  border: solid 2px #4a4a4a;
+}
+
+#FeedratePercentage {
+	position: absolute;
+	top: 333px;
+	left: 49px;
+	
+	width: 142px;
+	height: 16px;
+	font-family: Arial;
+	font-size: 15px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	color: #ffffff;
+	padding: 3px;
+	background-color: black;
+}
+
+#feedrate30_100 {
+	position: absolute;
+	top: 365px;
+	left: 54px;
+	
+	height: 21px;
+	width: 21px;
+}
+
+#feedrate30_100_Label {
+	position: absolute;
+	top: 368px;
+	left: 85px;
+	
+	font-family: Arial;
+	font-size: 15px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	color: #9f9f9f;
+}
+
+#feedrate30_300 {
+	position: absolute;
+	top: 401px;
+	left: 54px;
+	
+	height: 21px;
+	width: 21px;
+}
+
+#feedrate30_300_Label {
+	position: absolute;
+	top: 404px;
+	left: 85px;
+	
+	font-family: Arial;
+	font-size: 15px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	color: #9f9f9f;
+}
+
+/* FEEDRATE - End */
+
+#CancelButton {
+	position: absolute;
+	top: 462px;
+	left: 259px;
+	
+	cursor: pointer;
+	font-family: BebasNeue;
+	font-size: 18px;
+	line-height: 35px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	letter-spacing: normal;
+	text-align: center;
+	color: #212121;
+	
+	width: 93px;
+	height: 35px;
+	background-color: #dddddd;
+}
+
+#SaveButton {
+	position: absolute;
+	top: 462px;
+	left: 376px;
+	
+	cursor: pointer;
+	font-family: BebasNeue;
+	font-size: 18px;
+	line-height: 35px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	letter-spacing: normal;
+	text-align: center;
+	color: #ffffff;
+	
+	width: 116px;
+	height: 35px;
+	background-color: #069076;
+}

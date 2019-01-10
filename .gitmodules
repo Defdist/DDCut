@@ -1,0 +1,3 @@
+[submodule "src/RestClient/asio"]
+	path = src/RestClient/asio
+	url = https://github.com/chriskohlhoff/asio

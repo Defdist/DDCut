@@ -1,0 +1,34 @@
+ # Ignore visual studio files
+*.vcxproj.user
+*.pch
+*.sdf
+*ipch/
+.vs/
+
+# Ignore built files
+build/
+darwin/
+win32/
+dist/
+*.Intermediate/
+*.pdb
+*.exp
+*.obj
+*.cod
+
+# Ignore Node Files
+node_modules/
+app/node
+
+# Ignore Ghost Temp Files
+*ghost.conf
+logs/
+firmware/
+Cutting Code/
+
+# Ignore OS Files
+*.DS_Store
+thumbs.db
+
+# Ignore Secrets
+AuthKey.h

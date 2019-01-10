@@ -1,0 +1,19 @@
+﻿<html>
+	<head>
+      	<meta charset="UTF-8">
+		<link rel="stylesheet" href="styles/firmware_selection.css">
+		<script>require('electron-titlebar')</script>
+      	<title>DDCut</title>
+    </head>
+    <body style="background-color:black;">
+		<div id="electron-titlebar" platform="linux" style="height:30px; background-color:#151515;" class="drag no-minimize"></div>
+		
+		<div id="Title">Firmware Selection</div>
+		<div id="Instructions">Select firmware version to download.</div>
+		<select id="FirmwareList" size="5"></select> 
+		
+		<div id="CancelButton">CANCEL</div>
+		<div id="SelectButton">SELECT</div>
+	</body>
+	<script>require('./js/firmwareselection.js')</script>
+</html>

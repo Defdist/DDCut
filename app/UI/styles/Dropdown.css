@@ -1,0 +1,71 @@
+.dropdown,
+.dropdown ul,
+.dropdown li{
+  margin  : 0;
+  padding : 0;
+}
+
+.dropdown ul{
+  display  : none;
+  position : absolute;
+  top      : 100%;
+  left     : 0;
+  z-index  : 1;
+}
+
+.dropdown > .dropdownRightToLeft > ul{
+  left  : auto;
+  right : 0;
+}
+
+.dropdown ul ul{
+  top  : 0;
+  left : 100%;
+}
+
+.dropdown ul .dropdownRightToLeft ul{
+  left  : auto;
+  right : 100%;
+}
+
+.dropdown li{
+  position        : relative;
+  display         : block;
+  list-style-type : none;
+}
+
+.dropdown > li{
+  display : inline-block;
+}
+
+.dropdown a,
+.dropdown span{
+  display         : block;
+  text-decoration : none;
+  white-space     : pre;
+}
+
+.dropdown li:hover > ul{
+  display : block;
+}
+
+.dropdownVertical{
+  display : inline-block;
+}
+
+.dropdownVertical > li{
+  display : block;
+}
+
+.dropdownVertical ul{
+  top  : 0;
+  left : 100%;
+}
+
+.dropdownJavaScript li:hover > ul{
+  display : none;
+}
+
+.dropdownJavaScript li.dropdownOpen > ul{
+  display : block;
+}

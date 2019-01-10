@@ -1,0 +1,26 @@
+﻿<html>
+	<head>
+      	<meta charset="UTF-8">
+		<link rel="stylesheet" href="styles/customer_support.css">
+		<script>require('electron-titlebar')</script>
+      	<title>DDCut</title>
+    </head>
+    <body style="background-color:black;">
+		<div id="electron-titlebar" platform="linux" style="height:30px; background-color:#151515;" class="drag no-minimize"></div>
+		
+		<div id="Title">Customer Support Request</div>
+        <div id="Error" class="hidden">ERROR</div>
+		<div id="EmailLabel">Your e-mail address:</div>
+		<input id="Email" type="text" placeholder="someone@example.com" />
+		<textarea id="Description" placeholder="Please enter a description of your problem."></textarea>
+		
+		<!-- TODO: Style Checkbox -->
+		<input id="IncludeLogs" type="checkbox" />
+		<label id="IncludeLogsLabel" for="IncludeLogs">Include logs and data that might help us solve your problem.</label>
+		<!-- TODO: Add "What does this mean?" -->
+		
+		<div id="CancelButton">Cancel</div>
+		<div id="SendReportButton">Send Report</div>
+	</body>
+	<script>require('./js/customersupport.js')</script>
+</html>

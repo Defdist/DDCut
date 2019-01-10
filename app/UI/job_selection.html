@@ -1,0 +1,20 @@
+<html>
+	<head>
+      	<meta charset="UTF-8">
+		<link rel="stylesheet" href="styles/job_selection.css">
+		<script>require('electron-titlebar')</script>
+      	<title>DDCut</title>
+    </head>
+    <body style="background-color:black;">
+		<div id="electron-titlebar" platform="linux" style="height:30px; background-color:#151515;" class="drag no-minimize"></div>
+		
+		<div id="Title">Job Selection</div>
+		<div id="Instructions">Select job to continue.</div>
+		<select id="JobsList" size="5"></select> 
+		<textarea id="JobText" type="text" disabled="true" rows="6" cols="78"></textarea>
+		
+		<div id="CancelButton">CANCEL</div>
+		<div id="SelectButton">SELECT</div>
+	</body>
+	<script>require('./js/jobselection.js')</script>
+</html>
