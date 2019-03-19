@@ -1,0 +1,19 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="styles/software_update.css">
+    <script>require('electron-titlebar')</script>
+    <title>DDCut</title>
+</head>
+<body style="background-color:black;">
+    <div id="electron-titlebar" platform="linux" style="height:30px; background-color:#151515;" class="drag no-minimize"></div>
+
+    <div id="Title">Software Update Available</div>
+    <div id="VersionLabel">Update To: </div>
+    <textarea id="ReleaseNotes" type="text" disabled="true" rows="5" cols="78"></textarea>
+
+    <div id="CancelButton">CANCEL</div>
+    <div id="InstallButton">INSTALL</div>
+</body>
+<script>require('./js/softwareupdate.js')</script>
+</html>

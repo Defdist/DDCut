@@ -5,7 +5,7 @@
 #include "Common/OSUtility.h"
 #include "M100.h"
 #include "M101.h"
-#include "Logging/Logger.h"
+#include "DDLogger/DDLogger.h"
 #include "Common/LockUtility.h"
 
 #include <iostream>
@@ -23,7 +23,7 @@ GhostConnection::GhostConnection(const GhostGunner& ghostGunner)
 	m_ghSemaphore = LockUtility::CreateLock();
 	if (m_ghSemaphore == NULL)
 	{
-		Logger::GetInstance().Log("GhostConnection::GhostConnection() - ********** semaphore is null **********");
+		DDLogger::Log("GhostConnection::GhostConnection() - ********** semaphore is null **********");
 	}
 }
 
@@ -34,6 +34,7 @@ void GhostConnection::CleanState()
 		m_readCache.pop();
 	}
 
+	m_readBuffer = "";
 	m_lastReadTime = std::chrono::system_clock::now();
 	m_timeout = std::chrono::seconds(580);
 
@@ -85,7 +86,11 @@ void GhostConnection::reset()
 	VerifyConnected();
 
 	char t=24;
-	OSUtility::WriteToFile(m_file, &t, 1);
+	if (!OSUtility::WriteToFile(m_file, &t, 1))
+	{
+		throw GhostException(GhostException::FAILED_WRITE);
+	}
+
 	Sleep(1000);
 	flushReads();
 	CleanState();
@@ -178,7 +183,7 @@ void GhostConnection::send(const std::vector<std::string>& vs)
 
     for (size_t i = 0; i < vs.size(); ++i)
 	{
-		//Logger::GetInstance().Log("GhostConnection::send() - Sending: " + vs[i]);
+		//DDLogger::Log("GhostConnection::send() - Sending: " + vs[i]);
         m_dqWriteBuffer.push_back(GCodeLine(vs[i]));
     }
 }
@@ -192,7 +197,7 @@ void GhostConnection::send(const GCodeLine& l)
 {
 	VerifyConnected();
 
-	//Logger::GetInstance().Log("GhostConnection::send() - Sending: " + l.GetOriginal());
+	//DDLogger::Log("GhostConnection::send() - Sending: " + l.GetOriginal());
 	m_dqWriteBuffer.push_back(l);
 }
 
@@ -202,7 +207,7 @@ void GhostConnection::send(const std::vector<GCodeLine>& vg)
 
     for (size_t i = 0; i < vg.size(); ++i)
 	{
-		//Logger::GetInstance().Log("GhostConnection::send() - Sending: " + vg[i].GetOriginal());
+		//DDLogger::Log("GhostConnection::send() - Sending: " + vg[i].GetOriginal());
         m_dqWriteBuffer.push_back(vg[i]);
     }
 }
@@ -275,7 +280,7 @@ std::map<std::string, Point3> GhostConnection::GetPoints() const
 				const std::string xValueStr = sm[2].str();
 				const std::string yValueStr = sm[3].str();
 				const std::string zValueStr = sm[4].str();
-				Logger::GetInstance().Log("GhostConnection::GetPoints() - " + gCode + " : " + xValueStr + ", " + yValueStr + ", " + zValueStr);
+				DDLogger::Log("GhostConnection::GetPoints() - " + gCode + " : " + xValueStr + ", " + yValueStr + ", " + zValueStr);
 
 				const Point3 point(gCode, std::stof(xValueStr), std::stof(yValueStr), std::stof(zValueStr));
 				pointsByGCode[gCode] = point;
@@ -294,8 +299,8 @@ bool GhostConnection::ReadLine(std::string& buffer)
 {
 	VerifyConnected();
 
-	std::string readBuffer = "";
-
+	//std::string readBuffer = "";
+	//m_readBuffer = "";
 	char t;
 	while (OSUtility::ReadFromFile(m_file, &t, 1) > 0)
 	{
@@ -303,19 +308,21 @@ bool GhostConnection::ReadLine(std::string& buffer)
 
 		if (t == '\n')
 		{
-			ProcessReadLine(readBuffer);
+			m_readCache.push(m_readBuffer);
 
-			readBuffer = "";
+			ProcessReadLine(m_readBuffer);
+			m_readBuffer = "";
 		}
 		else if (t != '\r')
 		{
-			readBuffer.push_back(t);
+			m_readBuffer.push_back(t);
 		}
 	}
 
-	if (!readBuffer.empty())
+	if (!m_readCache.empty())
 	{
-		buffer = readBuffer;
+		buffer = m_readCache.front();
+		m_readCache.pop();
 		return true;
 	}
 
@@ -324,7 +331,7 @@ bool GhostConnection::ReadLine(std::string& buffer)
 
 void GhostConnection::ProcessReadLine(const std::string& line)
 {
-	//m_readCache.push(line);
+	m_readCache.push(line);
 
 	std::smatch sm;
 	const std::regex mStatus = RXSTATUS;
@@ -351,7 +358,7 @@ void GhostConnection::ProcessReadLine(const std::string& line)
 	}
 	else if (std::regex_match(line, RXLOCKED))
 	{
-		Logger::GetInstance().Log("GhostConnection::ReadLine() - Locked Received: " + line);
+		DDLogger::Log("GhostConnection::ReadLine() - Locked Received: " + line);
 		m_state |= GS_LOCKED;
 	}
 	else if (std::regex_match(line, sm, RXPRB) && !(m_state & GS_WCS_M101))
@@ -363,7 +370,7 @@ void GhostConnection::ProcessReadLine(const std::string& line)
 		// JT probe detection change
 		m_state &= ~GS_STATUS;
 
-		Logger::GetInstance().Log("GhostConnection::ReadLine() - Setting coordinates to: {" + sm[3].str() + ", " + sm[4].str() + ", " + sm[5].str() + "}");
+		DDLogger::Log("GhostConnection::ReadLine() - Setting coordinates to: {" + sm[3].str() + ", " + sm[4].str() + ", " + sm[5].str() + "}");
 		m_machinePosition.push_back(Coordinate(stof(sm[3].str()), stof(sm[4].str()), stof(sm[5].str())));
 
 		m_state &= ~GS_STATUS_IGNORE;
@@ -372,7 +379,7 @@ void GhostConnection::ProcessReadLine(const std::string& line)
 	{
 		if (m_flags & ERROR_EXCEPTION_ON)
 		{
-			Logger::GetInstance().Log("GhostConnection::ReadLine() - Error Received: " + line);
+			DDLogger::Log("GhostConnection::ReadLine() - Error Received: " + line);
 
 			m_state |= GS_ERROR;
 			m_err = line;
@@ -389,7 +396,7 @@ void GhostConnection::ProcessReadLine(const std::string& line)
 	else if (std::regex_match(line, sm, RXALARM))
 	{
 		m_err = "Alarm: " + std::string(sm[1]);
-		Logger::GetInstance().Log("GhostConnection::ReadLine() - Alarm: " + std::string(sm[1]));
+		DDLogger::Log("GhostConnection::ReadLine() - Alarm: " + std::string(sm[1]));
 
 		m_state |= GS_ERROR | GS_LOCKED;
 		if (sm[1] == "Probe fail")
@@ -433,7 +440,7 @@ void GhostConnection::flushReads() const
 	{
 		if (t == '\n')
 		{
-			Logger::GetInstance().Log("GhostConnection::FlushReads() - " + line);
+			DDLogger::Log("GhostConnection::FlushReads() - " + line);
 			line = "";
 		}
 		else if (t != '\r')
@@ -450,7 +457,7 @@ bool GhostConnection::ReadSingleLine(std::string& line) const
 	{
 		if (t == '\n')
 		{
-			Logger::GetInstance().Log("GhostConnection::ReadSingleLine() - Line Read: " + line);
+			DDLogger::Log("GhostConnection::ReadSingleLine() - Line Read: " + line);
 			return true;
 		}
 
@@ -472,7 +479,7 @@ std::string GhostConnection::ReadLineAndFlush() const
 	}
 	else
 	{
-		Logger::GetInstance().Log("GhostConnection::ReadLineAndFlush() - No lines were read.");
+		DDLogger::Log("GhostConnection::ReadLineAndFlush() - No lines were read.");
 	}
 
 	return output;
@@ -496,10 +503,10 @@ bool GhostConnection::WriteCache()
         }
 
 		// TODO: This lock was added for testing purposes.
-		if (LockUtility::ObtainLock(m_ghSemaphore))
+		//if (LockUtility::ObtainLock(m_ghSemaphore))
 		{
 			const bool continueWriting = WriteNextLineInCache(output);
-			LockUtility::ReleaseLock(m_ghSemaphore);
+			//LockUtility::ReleaseLock(m_ghSemaphore);
 			if (!continueWriting)
 			{
 				break;
@@ -517,7 +524,11 @@ bool GhostConnection::WriteCache()
 
         if (LockUtility::ObtainLock(m_ghSemaphore))
 		{
-            OSUtility::WriteToFile(m_file, output.c_str(), outputLength);
+            if (!OSUtility::WriteToFile(m_file, output.c_str(), outputLength))
+			{
+				throw GhostException(GhostException::FAILED_WRITE);
+			}
+
 			LockUtility::ReleaseLock(m_ghSemaphore);
         }
 
@@ -633,7 +644,7 @@ bool GhostConnection::WriteMCodeLine(std::string& output, const GCodeLine& line)
 				M101().Execute(*this, sm[2]);
 			}
 
-			//m_readCache.push("ok"); // TODO: Doesn't add much value
+			m_readCache.push("ok");
 			m_dqWriteBuffer.pop_front();
 
 			return true;
@@ -721,19 +732,23 @@ void GhostConnection::EchoLine(const std::string& cleaned, const std::string& or
 	{
 		if (m_flags & ECHO_ORIGINAL || !(m_flags & WRITE_CLEAN))
 		{
-			//m_readCache.push(original);
+			m_readCache.push(original);
 		}
 		else
 		{
-			//m_readCache.push(cleaned);
+			m_readCache.push(cleaned);
 		}
 	}
 }
 
 void GhostConnection::WriteWithTimeout(const std::string& stringToWrite, const int timeout) const
 {
-	Logger::GetInstance().Log("GhostConnection::WriteWithTimeout() - Writing: " + stringToWrite);
-	OSUtility::WriteToFile(m_file, stringToWrite.c_str(), stringToWrite.length());
+	DDLogger::Log("GhostConnection::WriteWithTimeout() - Writing: " + stringToWrite);
+	if (!OSUtility::WriteToFile(m_file, stringToWrite.c_str(), stringToWrite.length()))
+	{
+		throw GhostException(GhostException::FAILED_WRITE);
+	}
+
 	Sleep(timeout);
 }
 
@@ -755,7 +770,7 @@ void GhostConnection::UpdateFeedRate()
 {
 	if (m_feedRateChanged)
 	{
-		Logger::GetInstance().Log("GhostConnection::UpdateFeedRate - Feedrate changed. Updating feed rate.");
+		DDLogger::Log("GhostConnection::UpdateFeedRate - Feedrate changed. Updating feed rate.");
 		if (LockUtility::ObtainLock(m_ghSemaphore))
 		{
 			// TODO: Confirm this code

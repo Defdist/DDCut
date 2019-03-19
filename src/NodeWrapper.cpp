@@ -5,7 +5,7 @@
 
 // DDCut Headers
 #include "DDCutDaemon.h"
-#include "Logging/Logger.h"
+#include "DDLogger/DDLogger.h"
 
 void Execute_InitializeDaemon(napi_env env, void* data)
 {
@@ -38,7 +38,7 @@ napi_value InitializeDaemon(napi_env env, napi_callback_info info)
 	size_t argc = 1;
 	napi_value args[1];
 	status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-	assert(status == napi_ok);
+	ASSERT_STATUS(status);
 
 	napi_value resourceName;
 	const std::string initializeStr = "INITIALIZE";
@@ -744,7 +744,7 @@ napi_value GetAvailableFirmwareUpdates(napi_env env, napi_callback_info info)
 	size_t argc = 1;
 	napi_value args[1];
 	status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-	assert(status == napi_ok);
+	ASSERT_STATUS(status);
 
 	GetFirmwareUpdatesContext* pContext = new GetFirmwareUpdatesContext();
 
@@ -905,11 +905,138 @@ napi_value SetShowWalkthrough(napi_env env, napi_callback_info info)
 	return nullptr;
 }
 
+struct SoftwareUpdatesContext
+{
+	NAPIContext m_napiContext;
+	std::unique_ptr<SoftwareUpdateStatus> m_pUpdate;
+};
+
+void Execute_CheckForUpdates(napi_env env, void* data)
+{
+	SoftwareUpdatesContext* pContext = (SoftwareUpdatesContext*)data;
+	DDCutDaemon::GetInstance().CheckForUpdates().swap(pContext->m_pUpdate);
+}
+
+void Complete_CheckForUpdates(napi_env env, napi_status status, void* data)
+{
+	SoftwareUpdatesContext* pContext = (SoftwareUpdatesContext*)data;
+
+	napi_value callback;
+	napi_get_reference_value(env, pContext->m_napiContext.m_callback, &callback);
+
+	napi_value global;
+	napi_get_global(env, &global);
+
+	napi_value availableUpdate = nullptr;
+	if (pContext->m_pUpdate != nullptr)
+	{
+		napi_create_object(env, &availableUpdate);
+
+		napi_value latestVersion;
+		const std::string latestVersionStr = pContext->m_pUpdate->LATEST_VERSION;
+		napi_create_string_utf8(env, latestVersionStr.c_str(), latestVersionStr.size(), &latestVersion);
+		napi_set_named_property(env, availableUpdate, "LATEST_VERSION", latestVersion);
+
+		napi_value releaseNotes;
+		const std::string releaseNotesStr = pContext->m_pUpdate->RELEASE_NOTES;
+		napi_create_string_utf8(env, releaseNotesStr.c_str(), releaseNotesStr.size(), &releaseNotes);
+		napi_set_named_property(env, availableUpdate, "RELEASE_NOTES", releaseNotes);
+	}
+
+	napi_value result;
+	napi_value args[1] = { availableUpdate };
+	napi_call_function(env, global, callback, 1, args, &result);
+
+	napi_delete_reference(env, pContext->m_napiContext.m_callback);
+	napi_delete_async_work(env, pContext->m_napiContext.m_asyncWork);
+
+	delete pContext;
+}
+
+napi_value CheckForUpdates(napi_env env, napi_callback_info info)
+{
+	napi_status status;
+
+	size_t argc = 1;
+	napi_value args[1];
+	status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+	ASSERT_STATUS(status);
+
+	SoftwareUpdatesContext* pContext = new SoftwareUpdatesContext();
+
+	status = napi_create_reference(env, args[0], 1, &pContext->m_napiContext.m_callback);
+
+	napi_value resourceName;
+	const std::string resourceStr = "CHECK_FOR_UPDATES";
+	status = napi_create_string_utf8(env, resourceStr.c_str(), resourceStr.size(), &resourceName);
+
+	status = napi_create_async_work(env, NULL, resourceName, Execute_CheckForUpdates, Complete_CheckForUpdates, pContext, &pContext->m_napiContext.m_asyncWork);
+	status = napi_queue_async_work(env, pContext->m_napiContext.m_asyncWork);
+
+	return nullptr;
+}
+
+struct InstallUpdatesContext
+{
+	NAPIContext m_napiContext;
+	bool m_downloaded;
+};
+
+void Execute_InstallUpdates(napi_env env, void* data)
+{
+	InstallUpdatesContext* pContext = (InstallUpdatesContext*)data;
+	pContext->m_downloaded = DDCutDaemon::GetInstance().InstallUpdates();
+}
+
+void Complete_InstallUpdates(napi_env env, napi_status status, void* data)
+{
+	InstallUpdatesContext* pContext = (InstallUpdatesContext*)data;
+
+	napi_value callback;
+	napi_get_reference_value(env, pContext->m_napiContext.m_callback, &callback);
+
+	napi_value global;
+	napi_get_global(env, &global);
+
+	napi_value downloaded = nullptr;
+	napi_get_boolean(env, pContext->m_downloaded, &downloaded);
+
+	napi_value result;
+	napi_value args[1] = { downloaded };
+	napi_call_function(env, global, callback, 1, args, &result);
+
+	napi_delete_reference(env, pContext->m_napiContext.m_callback);
+	napi_delete_async_work(env, pContext->m_napiContext.m_asyncWork);
+
+	delete pContext;
+}
+
+napi_value InstallUpdates(napi_env env, napi_callback_info info)
+{
+	napi_status status;
+
+	size_t argc = 1;
+	napi_value args[1];
+	status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+	ASSERT_STATUS(status);
+
+	InstallUpdatesContext* pContext = new InstallUpdatesContext();
+
+	status = napi_create_reference(env, args[0], 1, &pContext->m_napiContext.m_callback);
+
+	napi_value resourceName;
+	const std::string resourceStr = "INSTALL_UPDATES";
+	status = napi_create_string_utf8(env, resourceStr.c_str(), resourceStr.size(), &resourceName);
+
+	status = napi_create_async_work(env, NULL, resourceName, Execute_InstallUpdates, Complete_InstallUpdates, pContext, &pContext->m_napiContext.m_asyncWork);
+	status = napi_queue_async_work(env, pContext->m_napiContext.m_asyncWork);
+
+	return nullptr;
+}
+
 napi_value Shutdown(napi_env env, napi_callback_info info)
 {
-	Logger::GetInstance().Log("SHUTTING DOWN");
-	DDCutDaemon::GetInstance().EmergencyStop(); // TODO: Call AbortJob, instead.
-	Logger::GetInstance().Flush();
+	DDCutDaemon::GetInstance().Shutdown();
 
 	return nullptr;
 }
@@ -922,7 +1049,7 @@ napi_value Init(napi_env env, napi_value exports)
 	DDCutDaemon::GetInstance();
 
 	napi_status status;
-	napi_property_descriptor descriptors[30] = {
+	napi_property_descriptor descriptors[32] = {
 		DECLARE_NAPI_METHOD("Initialize", InitializeDaemon),
 		DECLARE_NAPI_METHOD("Shutdown", Shutdown),
 
@@ -965,10 +1092,14 @@ napi_value Init(napi_env env, napi_value exports)
 
 		// Walkthroughs
 		DECLARE_NAPI_METHOD("ShouldShowWalkthrough", ShouldShowWalkthrough),
-		DECLARE_NAPI_METHOD("SetShowWalkthrough", SetShowWalkthrough)
+		DECLARE_NAPI_METHOD("SetShowWalkthrough", SetShowWalkthrough),
+
+		// Updates
+		DECLARE_NAPI_METHOD("CheckForUpdates", CheckForUpdates),
+		DECLARE_NAPI_METHOD("InstallUpdates", InstallUpdates)
 	};
 
-	status = napi_define_properties(env, exports, 30, descriptors);
+	status = napi_define_properties(env, exports, 32, descriptors);
 	ASSERT_STATUS(status)
 	return exports;
 }

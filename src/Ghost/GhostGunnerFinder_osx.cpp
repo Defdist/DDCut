@@ -1,7 +1,7 @@
 #ifdef __APPLE__
 #include "GhostGunnerFinder.h"
 
-#include "Logging/Logger.h"
+#include "DDLogger/DDLogger.h"
 
 #include <list>
 #include <string>
@@ -78,7 +78,7 @@ std::list<GhostGunner> GhostGunnerFinder::GetAvailableGhostGunners() const
 					CFStringGetCString(serialNumberRef, serialNumberBuf.data(), bufferSize, kCFStringEncodingMacRoman);
                     const std::string serialNumber = std::string(serialNumberBuf.begin(), serialNumberBuf.end());
 
-					//Logger::GetInstance().Log("VendorID: " + std::to_string(vendorID) + " ProductID: " + std::to_string(productID) + " LocationID: " + locationStr + " SerialNumber: " + serialNumber);
+					//DDLogger::Log("VendorID: " + std::to_string(vendorID) + " ProductID: " + std::to_string(productID) + " LocationID: " + locationStr + " SerialNumber: " + serialNumber);
                     
                     int numTrailingZeros = 0;
                     for (int i = locationStr.length() - 1; i >= 0; i--)
@@ -106,7 +106,7 @@ std::list<GhostGunner> GhostGunnerFinder::GetAvailableGhostGunners() const
 		IOObjectRelease(device);
 	}
 
-	//Logger::GetInstance().Log("Finished searching for ghostgunners: " + std::to_string(availableGhostGunners.size()) + " found.");
+	//DDLogger::Log("Finished searching for ghostgunners: " + std::to_string(availableGhostGunners.size()) + " found.");
 
 	IOObjectRelease(iter);
 

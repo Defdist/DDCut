@@ -69,9 +69,11 @@ std::unique_ptr<SoftwareUpdateStatus> DDRestClient::CheckForSoftwareUpdates(cons
 			Json::Value file = deletedNode.get(Json::ArrayIndex(i), "");
 			status.DELETED_FILES.emplace_back(file["relativePath"].asString());
 		}
+
+		return std::make_unique<SoftwareUpdateStatus>(status);
 	}
 
-	return std::make_unique<SoftwareUpdateStatus>(status);
+	return std::unique_ptr<SoftwareUpdateStatus>(nullptr);
 }
 
 std::vector<AvailableFirmware> DDRestClient::CheckForFirmwareUpdates(const std::string& ddcutVersion, const std::string& firmwareVersion)

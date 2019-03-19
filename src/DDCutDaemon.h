@@ -41,6 +41,8 @@ public:
 
 	void Initialize();
 
+	void Shutdown();
+
 
 
 	//////////////////////////////////////////////////////
@@ -164,6 +166,8 @@ public:
 
 	// Checks to see if any updates are available. Returns true if there are.
 	std::unique_ptr<SoftwareUpdateStatus> CheckForUpdates() const;
+
+	bool InstallUpdates();
 
 private:
 	DDCutDaemon();

@@ -1,7 +1,7 @@
 #include "SettingManager.h"
 
 #include "Common/OSUtility.h"
-#include "Logging/Logger.h"
+#include "DDLogger/DDLogger.h"
 
 #include <fstream>
 
@@ -16,7 +16,7 @@ SettingManager::SettingManager()
 	std::list<Setting> settings = ReadSettingsFromFile();
 	if (settings.empty())
 	{
-		Logger::GetInstance().Log("ReadSettings() - Config file path does not yet exist. Creating it now.");
+		DDLogger::Log("ReadSettings() - Config file path does not yet exist. Creating it now.");
 
 		Setting ghostGunnerSetting("GhostGunner", "2.0");
 		std::list<Setting> settings = { ghostGunnerSetting };
@@ -53,7 +53,7 @@ std::list<Setting> SettingManager::ReadSettingsFromFile() const
 
 				const Setting setting(key, value);
 				settings.push_back(setting);
-				Logger::GetInstance().Log("ReadSettings() - " + line);
+				DDLogger::Log("ReadSettings() - " + line);
 			}
 
 			fclose(pFile);
@@ -61,7 +61,7 @@ std::list<Setting> SettingManager::ReadSettingsFromFile() const
 	}
 	else
 	{
-		Logger::GetInstance().Log("ReadSettings() - Config file path was not found.");
+		DDLogger::Log("ReadSettings() - Config file path was not found.");
 	}
 
     return settings;
@@ -202,11 +202,11 @@ bool SettingManager::UpdateSettings(const std::list<Setting>& settings)
 	const std::string configFilePath = GetConfigFilePath();
 	if (configFilePath.empty())
 	{
-		Logger::GetInstance().Log("UpdateSettings() - Config file path was not found.");
+		DDLogger::Log("UpdateSettings() - Config file path was not found.");
 		return false;
 	}
 
-	Logger::GetInstance().Log("UpdateSettings() - " + std::to_string(m_settingsByKey.size()));
+	DDLogger::Log("UpdateSettings() - " + std::to_string(m_settingsByKey.size()));
 	FILE* pFile = fopen(configFilePath.c_str(), "w");
 	if (pFile != nullptr)
 	{
@@ -226,7 +226,7 @@ std::string SettingManager::GetConfigFilePath() const
 	const std::string execPath = OSUtility::GetExecPath();
 	if (execPath.empty())
 	{
-		Logger::GetInstance().Log("GetConfigFilePath() - Executable path was not found.");
+		DDLogger::Log("GetConfigFilePath() - Executable path was not found.");
 		return "";
 	}
 

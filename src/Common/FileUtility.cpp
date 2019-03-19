@@ -1,6 +1,6 @@
 #include "FileUtility.h"
 
-#include <Logging/Logger.h>
+#include <DDLogger/DDLogger.h>
 
 #include <iostream>
 #include <fstream>
@@ -58,7 +58,7 @@ bool FileUtility::GetWorkingDirectory(std::string& currentDirectory)
         return true;
     }
     
-    Logger::GetInstance().Log("FileUtility::GetWorkingDirectory - Error getting current directory: #" + std::to_string(GetLastError()));
+    DDLogger::Log("FileUtility::GetWorkingDirectory - Error getting current directory: #" + std::to_string(GetLastError()));
 #endif
     
     return false;
@@ -72,7 +72,7 @@ bool FileUtility::SetWorkingDirectory(const std::string& newDirectory)
         return true;
     }
     
-    Logger::GetInstance().Log("FileUtility::SetWorkingDirectory - Error setting current directory: #" + std::to_string(GetLastError()));
+    DDLogger::Log("FileUtility::SetWorkingDirectory - Error setting current directory: #" + std::to_string(GetLastError()));
 #endif
     
     return false;

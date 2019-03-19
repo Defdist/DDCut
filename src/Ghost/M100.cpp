@@ -5,7 +5,7 @@
 #include "GhostException.h"
 #include "Point.h"
 #include "Common/OSUtility.h"
-#include "Logging/Logger.h"
+#include "DDLogger/DDLogger.h"
 #include "GhostConnection.h"
 #include "PointUtility.h"
 
@@ -23,7 +23,7 @@
 // Example command that would be sent to GG to update the coordinate system's axis value: G10 L2 P1 X3.5 Y17.2
 void M100::Execute(const GhostConnection& connection, const std::string& args) const
 {
-	Logger::GetInstance().Log("M100::Execute() - BEGIN - args:" + args);
+	DDLogger::Log("M100::Execute() - BEGIN - args:" + args);
 	connection.VerifyConnected();
 
 	// Arg format: G55 X G56 Y G57 Z
@@ -50,14 +50,14 @@ void M100::Execute(const GhostConnection& connection, const std::string& args) c
 	ss << "G10 L2 P" << pCode << " " << axisOut << centerValueStr << "\n";
 	const std::string output = ss.str();
 
-	Logger::GetInstance().Log("M100::Execute() - " + output);
+	DDLogger::Log("M100::Execute() - " + output);
 	connection.WriteWithTimeout(output, 100);
 	connection.flushReads();
 
 	// Check that new point system has correct values.
 	VerifyRange(connection, points.first, points.second, gOut, axisOut);
 
-	Logger::GetInstance().Log("M100::Execute() - END");
+	DDLogger::Log("M100::Execute() - END");
 }
 
 float M100::CalcCenterValue(const float x, const float y) const
@@ -67,7 +67,7 @@ float M100::CalcCenterValue(const float x, const float y) const
 
 	const float axisCenter = x2 + ((x1 - x2) / 2);
 
-	Logger::GetInstance().Log("M100::CalcCenterValue() - x: " + std::to_string(x) + " y: " + std::to_string(y) + " center: " + std::to_string(axisCenter));
+	DDLogger::Log("M100::CalcCenterValue() - x: " + std::to_string(x) + " y: " + std::to_string(y) + " center: " + std::to_string(axisCenter));
 	std::cout << x2 << " + " << "((" << x1 << " - " << x2 << ") div 2) = " << axisCenter << std::endl;
 
 	return axisCenter;
@@ -111,14 +111,14 @@ std::vector<Point3> M100::LoadPoints(const GhostConnection& connection, const st
 	if (points.find(gIn1) != points.end())
 	{
 		const Point3 point1 = points.find(gIn1)->second;
-		Logger::GetInstance().Log("M100::LoadPoints() - gIn1 found -" + point1.wcs + ": " + std::to_string(point1.x) + ", " + std::to_string(point1.y) + ", " + std::to_string(point1.z));
+		DDLogger::Log("M100::LoadPoints() - gIn1 found -" + point1.wcs + ": " + std::to_string(point1.x) + ", " + std::to_string(point1.y) + ", " + std::to_string(point1.z));
 		m100Points.push_back(point1);
 	}
 
 	if (points.find(gIn2) != points.end())
 	{
 		const Point3 point2 = points.find(gIn2)->second;
-		Logger::GetInstance().Log("M100::LoadPoints() - gIn2 found -" + point2.wcs + ": " + std::to_string(point2.x) + ", " + std::to_string(point2.y) + ", " + std::to_string(point2.z));
+		DDLogger::Log("M100::LoadPoints() - gIn2 found -" + point2.wcs + ": " + std::to_string(point2.x) + ", " + std::to_string(point2.y) + ", " + std::to_string(point2.z));
 		m100Points.push_back(point2);
 	}
 
@@ -144,7 +144,7 @@ std::pair<float, float> M100::GetAxisValues(const std::string& axisIn, const std
 		fval1 = m100points.at(1).z;
 	}
 
-	Logger::GetInstance().Log("M100::GetPoints() - " + axisIn + " axis - " + m100points.at(0).wcs + ":" + std::to_string(fval0) + " <--> " + m100points.at(1).wcs + ":" + std::to_string(fval1));
+	DDLogger::Log("M100::GetPoints() - " + axisIn + " axis - " + m100points.at(0).wcs + ":" + std::to_string(fval0) + " <--> " + m100points.at(1).wcs + ":" + std::to_string(fval1));
 
 	return std::make_pair(fval0, fval1);
 }
@@ -155,7 +155,7 @@ void M100::VerifyRange(const GhostConnection& connection, const float fval0, con
 	if (points.find(gOut) != points.end())
 	{
 		const Point3 point = points.find(gOut)->second;
-		Logger::GetInstance().Log("M100::GetResultAndVerifyRange() - gOut found -" + point.wcs + ": " + std::to_string(point.x) + ", " + std::to_string(point.y) + ", " + std::to_string(point.z));
+		DDLogger::Log("M100::GetResultAndVerifyRange() - gOut found -" + point.wcs + ": " + std::to_string(point.x) + ", " + std::to_string(point.y) + ", " + std::to_string(point.z));
 
 		const float axisValue = PointUtility::GetAxisValue(axisOut, point);
 		const float v1 = fval1 > axisValue ? fval1 - axisValue : axisValue - fval1;
@@ -163,12 +163,12 @@ void M100::VerifyRange(const GhostConnection& connection, const float fval0, con
 
 		if (v1 > v2)
 		{
-			Logger::GetInstance().Log("M100::GetVerifyRange() - Value not in range. Value: " + std::to_string(point.x) + " - Range: " + std::to_string(fval0) + "-" + std::to_string(fval1));
+			DDLogger::Log("M100::GetVerifyRange() - Value not in range. Value: " + std::to_string(point.x) + " - Range: " + std::to_string(fval0) + "-" + std::to_string(fval1));
 			throw GhostException(GhostException::M100_OUTOFRANGE);
 		}
 	}
 	else
 	{
-		Logger::GetInstance().Log("M100::VerifyRange() - " + gOut + " NOT FOUND.");
+		DDLogger::Log("M100::VerifyRange() - " + gOut + " NOT FOUND.");
 	}
 }

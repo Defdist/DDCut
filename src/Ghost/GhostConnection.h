@@ -39,7 +39,7 @@ class GhostConnection
 	// TODO: Figure out what these are for.
 	std::deque<GCodeLine> m_dqWriteBuffer;
 	CurrentWrites m_currentWrites;
-
+	std::string m_readBuffer = "";
 
 	int m_lastGGroup = -1;
 	int m_sfeedrate = 100;  // last saved feedrate

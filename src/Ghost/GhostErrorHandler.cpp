@@ -1,5 +1,5 @@
 #include "GhostErrorHandler.h"
-#include "Logging/Logger.h"
+#include "DDLogger/DDLogger.h"
 #include "ProbeHelper.h"
 #include "Common/OSUtility.h"
 
@@ -96,7 +96,7 @@ void GhostErrorHandler::HandleFailure(GhostConnection& ghostConnection) const
 		std::string s;
 		while (ghostConnection.ReadLine(s))
 		{
-			Logger::GetInstance().Log(s);
+			DDLogger::Log(s);
 		}
 
 		//DDFileManager::GetInstance().SetSelectedFile(nullptr);
@@ -188,7 +188,7 @@ bool GhostErrorHandler::WriteToGhostGunner(GhostConnection& ghostConnection) con
 			while (ghostConnection.ReadLine(s))
 			{
 				hit = true;
-				Logger::GetInstance().Log(s);
+				DDLogger::Log(s);
 			}
 
 			if (!hit)
@@ -198,7 +198,7 @@ bool GhostErrorHandler::WriteToGhostGunner(GhostConnection& ghostConnection) con
 
 			if (ghostConnection.getState() & Ghost::Status::GS_TIMEOUT)
 			{
-				Logger::GetInstance().Log("timeout exceeded in probe recovery");
+				DDLogger::Log("timeout exceeded in probe recovery");
 				break;
 			}
 		}

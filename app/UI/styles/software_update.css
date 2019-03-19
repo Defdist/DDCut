@@ -1,0 +1,99 @@
+body {
+	border: 0px;
+	margin: 0px 0px 0px 0px;
+	padding: 0px 0px 0px 0px;
+	overflow-x: hidden;
+	overflow-y: hidden;
+}
+
+@font-face {
+    font-family: BebasNeue;
+    src: url("../fonts/BebasNeue-Regular.otf") format("opentype");
+}
+
+.clickable {
+	cursor: pointer;
+}
+
+#Title {
+	position: absolute;
+	top: 7px;
+	left: 50px;
+	width: 300px;
+	height: 17px;
+
+	font-family: Arial;
+	font-size: 15px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	letter-spacing: 0.7px;
+	text-align: center;
+	color: #ffffff;
+}
+
+#VersionLabel {
+    position: absolute;
+    top: 50px;
+    left: 0px;
+    width: 400px;
+    height: 16px;
+    font-family: Arial;
+    font-size: 15px;
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: normal;
+    text-align: center;
+    letter-spacing: -0.2px;
+    color: #ffffff;
+}
+
+#ReleaseNotes {
+	position: absolute;
+	top: 90px;
+	left: 15px;
+	width: 370px !important;
+}
+
+#CancelButton {
+	position: absolute;
+	top: 205px;
+	left: 150px;
+	width: 94px;
+	height: 35px;
+	background-color: #dddddd;
+	cursor: pointer;
+	
+	font-family: BebasNeue;
+	font-size: 18px;
+	font-weight: normal;
+	font-style: normal;
+	font-stretch: normal;
+	line-height: normal;
+	letter-spacing: normal;
+	text-align: center;
+	line-height: 35px;
+	color: #212121;
+}
+
+#InstallButton {
+    position: absolute;
+    top: 205px;
+    left: 267px;
+    width: 116px;
+    height: 35px;
+    background-color: #069076;
+    cursor: pointer;
+    font-family: BebasNeue;
+    font-size: 18px;
+    font-weight: normal;
+    font-style: normal;
+    font-stretch: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: center;
+    line-height: 35px;
+    color: #ffffff;
+}

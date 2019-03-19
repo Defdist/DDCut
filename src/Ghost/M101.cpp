@@ -4,7 +4,7 @@
 #include "GhostRegex.h"
 #include "GhostException.h"
 #include "Common/OSUtility.h"
-#include "Logging/Logger.h"
+#include "DDLogger/DDLogger.h"
 #include "Common/OSFile.h"
 #include "GhostConnection.h"
 #include "PointUtility.h"
@@ -28,7 +28,7 @@
 // TODO: Document args format.
 void M101::Execute(GhostConnection& connection, const std::string& args) const
 {
-	Logger::GetInstance().Log("M101::Execute() - BEGIN - args:" + args);
+	DDLogger::Log("M101::Execute() - BEGIN - args:" + args);
 	connection.VerifyConnected();
 	
 	// Unpack args.
@@ -47,7 +47,7 @@ void M101::Execute(GhostConnection& connection, const std::string& args) const
 		throw GhostException(GhostException::M101_FAIL, axis);
 	}
 
-	Logger::GetInstance().Log("M101::Execute() - END");
+	DDLogger::Log("M101::Execute() - END");
 }
 
 std::vector<float> M101::LoadAxisValues(GhostConnection& connection, const std::string& gIn1, const std::string& gIn2, const std::string& gIn3, const std::string& axis) const
@@ -58,7 +58,7 @@ std::vector<float> M101::LoadAxisValues(GhostConnection& connection, const std::
 	if (points.find(gIn1) != points.end())
 	{
 		const Point3 point1 = points.find(gIn1)->second;
-		Logger::GetInstance().Log("M101::LoadPoints() - gIn1 found -" + point1.wcs + ": " + std::to_string(point1.x) + ", " + std::to_string(point1.y) + ", " + std::to_string(point1.z));
+		DDLogger::Log("M101::LoadPoints() - gIn1 found -" + point1.wcs + ": " + std::to_string(point1.x) + ", " + std::to_string(point1.y) + ", " + std::to_string(point1.z));
 
 		m101PointAxisValues.push_back(PointUtility::GetAxisValue(axis, point1));
 	}
@@ -66,7 +66,7 @@ std::vector<float> M101::LoadAxisValues(GhostConnection& connection, const std::
 	if (points.find(gIn2) != points.end())
 	{
 		const Point3 point2 = points.find(gIn2)->second;
-		Logger::GetInstance().Log("M101::LoadPoints() - gIn2 found -" + point2.wcs + ": " + std::to_string(point2.x) + ", " + std::to_string(point2.y) + ", " + std::to_string(point2.z));
+		DDLogger::Log("M101::LoadPoints() - gIn2 found -" + point2.wcs + ": " + std::to_string(point2.x) + ", " + std::to_string(point2.y) + ", " + std::to_string(point2.z));
 
 		m101PointAxisValues.push_back(PointUtility::GetAxisValue(axis, point2));
 	}
@@ -74,7 +74,7 @@ std::vector<float> M101::LoadAxisValues(GhostConnection& connection, const std::
 	if (points.find(gIn3) != points.end())
 	{
 		const Point3 point3 = points.find(gIn3)->second;
-		Logger::GetInstance().Log("M101::LoadPoints() - gIn3 found -" + point3.wcs + ": " + std::to_string(point3.x) + ", " + std::to_string(point3.y) + ", " + std::to_string(point3.z));
+		DDLogger::Log("M101::LoadPoints() - gIn3 found -" + point3.wcs + ": " + std::to_string(point3.x) + ", " + std::to_string(point3.y) + ", " + std::to_string(point3.z));
 
 		m101PointAxisValues.push_back(PointUtility::GetAxisValue(axis, point3));
 	}
@@ -86,7 +86,7 @@ bool M101::CheckTolerance(const std::vector<float>& pointValues, const std::stri
 {
 	auto mmax = max_element(std::begin(pointValues), std::end(pointValues));
 	auto mmin = min_element(std::begin(pointValues), std::end(pointValues));
-	Logger::GetInstance().Log("M101::CheckTolerance() - " + axis + " - Max:" + std::to_string(*mmax) + " Min:" + std::to_string(*mmin) + " Diff:" + std::to_string(std::abs(*mmax - *mmin)));
+	DDLogger::Log("M101::CheckTolerance() - " + axis + " - Max:" + std::to_string(*mmax) + " Min:" + std::to_string(*mmin) + " Diff:" + std::to_string(std::abs(*mmax - *mmin)));
 
 	if (std::abs(*mmax - *mmin) >= maxTolerance)
 	{

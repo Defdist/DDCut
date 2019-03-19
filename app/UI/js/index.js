@@ -55,28 +55,54 @@ var connectionStatusIntervalId = setInterval(CheckConnectionStatus, 50);
 //////////////////////////////////////////////////////
 // SOFTWARE UPDATES
 //////////////////////////////////////////////////////
-function ShowSoftwareUpdateWindow() {
-    // Create the browser window.
-    var softwareUpdateWindow = new BrowserWindow({
-        width: 625, height: 500, frame: false, resizable: false, parent: electron.remote.getCurrentWindow(), modal: false,
-        icon: path.join(__dirname, '../img/logo-white.png')
-    })
+function InstallUpdates(event) {
+    console.log("Installing Updates...")
 
-    softwareUpdateWindow.setMenu(null);
-    softwareUpdateWindow.on('closed', () => {
-        $("#Modal").addClass('hidden');
-        //softwareUpdateWindow = null;
+    $("#Modal").addClass('hidden');
+    // TODO: Show downloading screen.
+
+    ddcut.InstallUpdates(function (updatesDownloaded) {
+        if (!updatesDownloaded) {
+            // TODO: Close downloading screen & show error
+            $("#Modal").removeClass('hidden');
+        } else {
+            electron.remote.getCurrentWindow().close();
+        }
     });
 
-    softwareUpdateWindow.loadURL(
-        url.format({
-            pathname: path.join(__dirname, '../software_update.html'),
-            protocol: 'file:',
-            slashes: true
-        })
-    );
+}
 
-    $("#Modal").removeClass('hidden');
+function CheckForSoftwareUpdates() {
+    console.log("CheckForSoftwareUpdates");
+    ddcut.CheckForUpdates(function (availableUpdate) {
+        if (availableUpdate != null) {
+            console.log(availableUpdate);
+            let updateWindow = new BrowserWindow({
+                width: 400, height: 250, frame: false, resizable: false,
+                parent: electron.remote.getCurrentWindow(), modal: false, icon: path.join(__dirname, '../img/logo-white.png')
+            });
+            updateWindow.setMenu(null);
+            updateWindow.on('closed', () => {
+                $("#Modal").addClass('hidden');
+            });
+
+            updateWindow.loadURL(
+                url.format({
+                    pathname: path.join(__dirname, '../software_update.html'),
+                    protocol: 'file:',
+                    slashes: true
+                })
+            );
+
+            $("#Modal").removeClass('hidden');
+
+            updateWindow.webContents.on('did-finish-load', () => {
+                updateWindow.webContents.send("UPDATE", availableUpdate, "INSTALL_UPDATES");
+            });
+        } else {
+            // TODO: Show "No Updates Available"
+        }
+    });
 }
 
 //////////////////////////////////////////////////////
@@ -216,23 +242,7 @@ function AddMenuListeners()
 	);
 	
 	document.getElementById("MenuUpdates").addEventListener('click',
-        function () {
-            if (!$("#MenuUpdates").hasClass("inactive")) {
-                const BrowserWindow = electron.remote.BrowserWindow;
-                const path = require('path');
-                const url = require('url');
-                let win = new BrowserWindow({
-                    width: 220, height: 105, frame: true, resizable: false,
-                    parent: electron.remote.getCurrentWindow(), modal: true, icon: path.join(__dirname, '../img/logo-white.png')
-                });
-                win.setMenu(null);
-                const pageContent = ("<p><center>IN PROGRESS!<br/><br/>COMING SOON!</center></p>");
-
-                win.loadURL('data:text/html;charset=UTF-8,' + encodeURIComponent(pageContent), {
-                    baseURLForDataURL: `file://${__dirname}/app/`
-                });
-            }
-		}	
+        CheckForSoftwareUpdates
 	);
 	
 	document.getElementById("MenuExit").addEventListener('click',
@@ -257,6 +267,8 @@ function AddMenuListeners()
 }
 
 AddMenuListeners();
+
+ipc.on('INSTALL_UPDATES', InstallUpdates);
 
 document.getElementById("GhostGunnerNet").addEventListener('click',
 	function() {

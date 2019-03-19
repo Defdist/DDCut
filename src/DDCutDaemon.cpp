@@ -8,10 +8,11 @@
 #include "Ghost/JobManager.h"
 #include "Ghost/GhostFirmwareManager.h"
 #include "Files/DDFileManager.h"
-#include "Logging/Logger.h"
+#include "DDLogger/DDLogger.h"
 #include "Common/ThreadManager.h"
 #include "RestClient/DDRestClient.h"
 #include "RestClient/FileDownloader.h"
+#include "DDUpdater/DDUpdater.h"
 
 #include <thread>
 #include <filesystem>
@@ -40,7 +41,7 @@ void Thread_Connect(std::atomic_bool& shutdown, EGhostGunnerStatus& connectionSt
 				{
 					// TODO: Handle multiple ghost gunners connected.
 					const GhostGunner& ghostGunner = availableGhostGunners.front();
-					//Logger::GetInstance().Log("Thread_Initialize() - GhostGunner Found - Path: " + ghostGunner.GetPath() + " Serial Number: " + ghostGunner.GetSerialNumber());
+					//DDLogger::Log("Thread_Initialize() - GhostGunner Found - Path: " + ghostGunner.GetPath() + " Serial Number: " + ghostGunner.GetSerialNumber());
 					GhostGunnerManager::GetInstance().SetSelectedGhostGunner(ghostGunner);
 					connectionStatus = connecting;
 				}
@@ -48,14 +49,14 @@ void Thread_Connect(std::atomic_bool& shutdown, EGhostGunnerStatus& connectionSt
 			
 			if (connectionStatus == connecting)
 			{
-				Logger::GetInstance().Log("Thread_Connect() - Connecting");
+				DDLogger::Log("Thread_Connect() - Connecting");
 				GhostConnection* pConnection = GhostGunnerManager::GetInstance().GetConnection();
 				if (pConnection != nullptr)
 				{
 					connectionStatus = ConnectionInitializer().InitializeConnection(*pConnection) ? connected : connectionFailed;
 				}
 
-				Logger::GetInstance().Log("Thread_Connect() - " + std::to_string(connectionStatus));
+				DDLogger::Log("Thread_Connect() - " + std::to_string(connectionStatus));
 			}
 			
 			if (connectionStatus == connected)
@@ -78,7 +79,7 @@ void Thread_Connect(std::atomic_bool& shutdown, EGhostGunnerStatus& connectionSt
 
 				if (!stillPluggedIn)
 				{
-					Logger::GetInstance().Log("Thread_Connect() - GhostGunner unplugged");
+					DDLogger::Log("Thread_Connect() - GhostGunner unplugged");
 					connectionStatus = notConnected;
 				}
 			}
@@ -97,11 +98,7 @@ DDCutDaemon::DDCutDaemon()
 
 DDCutDaemon::~DDCutDaemon()
 {
-	m_shutdown = true;
-	if (initializeThread.joinable())
-	{
-		initializeThread.join();
-	}
+	Shutdown();
 }
 
 DDCutDaemon& DDCutDaemon::GetInstance()
@@ -113,7 +110,7 @@ DDCutDaemon& DDCutDaemon::GetInstance()
 void DDCutDaemon::Initialize()
 {
 	ThreadManager::GetInstance().SetCurrentThreadName("MAIN_THREAD");
-	Logger::GetInstance().Log("Initializing");
+	DDLogger::Log("Initializing");
 
 	// 1. Initialize Setting Manager (this will read and cache preferences)
 	SettingManager& settingManager = SettingManager::GetInstance();
@@ -122,7 +119,22 @@ void DDCutDaemon::Initialize()
 	initializeThread = std::thread(Thread_Connect, std::ref(m_shutdown), std::ref(m_connectionStatus), m_lockHandle);
 }
 
+void DDCutDaemon::Shutdown()
+{
+	if (!m_shutdown)
+	{
+		m_shutdown = true;
 
+		if (initializeThread.joinable())
+		{
+			initializeThread.join();
+		}
+
+		DDLogger::Log("SHUTTING DOWN");
+		DDCutDaemon::GetInstance().EmergencyStop(); // TODO: Call AbortJob, instead.
+		DDLogger::Flush();
+	}
+}
 
 //////////////////////////////////////////////////////
 // DDFile
@@ -135,7 +147,7 @@ DDFile* DDCutDaemon::GetDDFile() const
 
 bool DDCutDaemon::SetDDFile(const std::string& ddFilePath) const
 {
-	Logger::GetInstance().Log("DDCutDaemon::SetDDFile - " + ddFilePath);
+	DDLogger::Log("DDCutDaemon::SetDDFile - " + ddFilePath);
 	DDFileManager::GetInstance().SetSelectedFile(ddFilePath);
 	return true;
 }
@@ -203,7 +215,7 @@ std::vector<Job> DDCutDaemon::GetJobs() const
 
 bool DDCutDaemon::SelectJob(const size_t jobIndex) const
 {
-	Logger::GetInstance().Log("DDCutDaemon::SelectJob() - jobIndex:" + std::to_string(jobIndex));
+	DDLogger::Log("DDCutDaemon::SelectJob() - jobIndex:" + std::to_string(jobIndex));
 
 	DDFile* pSelectedFile = DDFileManager::GetInstance().GetSelectedFile();
 	if (pSelectedFile != nullptr)
@@ -242,7 +254,7 @@ int DDCutDaemon::GetFeedRate() const
 		feedRate = pConnection->GetFeedRate();
 	}
 
-	Logger::GetInstance().Log("DDCutDaemon::GetFeedRate() - FeedRate: " + std::to_string(feedRate));
+	DDLogger::Log("DDCutDaemon::GetFeedRate() - FeedRate: " + std::to_string(feedRate));
 
 	return feedRate;
 }
@@ -252,7 +264,7 @@ bool DDCutDaemon::SetFeedRate(const int feedRate)
 	GhostConnection* pConnection = GhostGunnerManager::GetInstance().GetConnection();
 	if (pConnection != nullptr)
 	{
-		Logger::GetInstance().Log("DDCutDaemon::SetFeedRate() - FeedRate changed from " + std::to_string(pConnection->GetFeedRate()) + " to " + std::to_string(feedRate));
+		DDLogger::Log("DDCutDaemon::SetFeedRate() - FeedRate changed from " + std::to_string(pConnection->GetFeedRate()) + " to " + std::to_string(feedRate));
 		pConnection->SetFeedRate(feedRate);
 		return true;
 	}
@@ -305,7 +317,7 @@ bool DDCutDaemon::UpdateSettings(const std::list<Setting>& settings) const
 
 bool DDCutDaemon::UploadFirmware(const AvailableFirmware& firmware)
 {
-	Logger::GetInstance().Log("DDCutDaemon::UploadFirmware() - Uploading firmware " + firmware.VERSION);
+	DDLogger::Log("DDCutDaemon::UploadFirmware() - Uploading firmware " + firmware.VERSION);
 
 	GhostConnection* pConnection = GhostGunnerManager::GetInstance().GetConnection();
 	if (pConnection != nullptr && !firmware.FILES.empty())
@@ -337,7 +349,7 @@ FirmwareVersion DDCutDaemon::GetFirmwareVersion() const
 
 std::vector<AvailableFirmware> DDCutDaemon::GetAvailableFirmwareUpdates() const
 {
-	Logger::GetInstance().Log("DDCutDaemon::GetAvailableFirmwareUpdates() - Checking for updates.");
+	DDLogger::Log("DDCutDaemon::GetAvailableFirmwareUpdates() - Checking for updates.");
 	
 	const std::string firmwareVersion = GetFirmwareVersion().ddVersion;
 
@@ -366,10 +378,10 @@ void DDCutDaemon::SetShowWalkthrough(const EWalkthroughType& walkthroughType, co
 
 std::unique_ptr<CustServiceReqError> DDCutDaemon::SendCustomerSupportRequest(const std::string& email, const std::string& message, const bool includeLogs) const
 {
-	Logger::GetInstance().Log("DDCutDaemon::SendCustomerSupportRequest() - Sending Request.");
+	DDLogger::Log("DDCutDaemon::SendCustomerSupportRequest() - Sending Request.");
 	if (includeLogs)
 	{
-		const std::string logText = Logger::GetInstance().ReadLog();
+		const std::string logText = DDLogger::ReadLog();
 		return DDRestClient().SendCustomerServiceRequest("NOT_IMPLEMENTED", email, message, DDCUT_VERSION, logText);
 	}
 	else
@@ -380,9 +392,22 @@ std::unique_ptr<CustServiceReqError> DDCutDaemon::SendCustomerSupportRequest(con
 
 std::unique_ptr<SoftwareUpdateStatus> DDCutDaemon::CheckForUpdates() const
 {
-	Logger::GetInstance().Log("DDCutDaemon::CheckForUpdates() - Checking for updates.");
+	DDLogger::Log("DDCutDaemon::CheckForUpdates() - Checking for updates.");
 
-	return DDRestClient().CheckForSoftwareUpdates(DDCUT_VERSION);
+	std::unique_ptr<SoftwareUpdateStatus> pSoftwareUpdateStatus = DDRestClient().CheckForSoftwareUpdates(DDCUT_VERSION);
+	if (pSoftwareUpdateStatus != nullptr)
+	{
+		DDLogger::Log("DDCutDaemon::CheckForUpdates() - Latest Version: " + pSoftwareUpdateStatus->LATEST_VERSION);
+	}
+
+	return pSoftwareUpdateStatus;
+}
+
+bool DDCutDaemon::InstallUpdates()
+{
+	DDLogger::Log("DDCutDaemon::InstallUpdates() - Installing updates.");
+
+	return DDUpdater().UpdateDDCut("ddcut2.exe", DDCUT_VERSION);
 }
 
 
@@ -416,13 +441,18 @@ std::unique_ptr<Operation> DDCutDaemon::GetStep(const int stepIndex) const
 std::thread millingThread;
 bool millingInProgress = false;
 
-void Thread_StartMilling(Job& job, Operation& operation)
+void Thread_StartMilling(HANDLE lockHandle, Job& job, Operation& operation)
 {
 	ThreadManager::GetInstance().SetCurrentThreadName("MILLING_THREAD");
-	Logger::GetInstance().Log("MILLING THREAD - Start");
-	GhostGunnerManager::GetInstance().ReadWriteCycle(&job, &operation);
+	DDLogger::Log("MILLING THREAD - Start");
+	if (LockUtility::ObtainLock(lockHandle))
+	{
+		GhostGunnerManager::GetInstance().ReadWriteCycle(&job, &operation);
+
+		LockUtility::ReleaseLock(lockHandle);
+	}
 	millingInProgress = false;
-	Logger::GetInstance().Log("MILLING THREAD - End");
+	DDLogger::Log("MILLING THREAD - End");
 }
 
 bool DDCutDaemon::StartMilling(const int stepIndex) const
@@ -436,9 +466,11 @@ bool DDCutDaemon::StartMilling(const int stepIndex) const
 			Job* pJob = jobManager.GetSelectedJob();
 			if (pJob != nullptr)
 			{
+				pConnection->clearCoordinates();
+
 				Operation& operation = pJob->GetOperation(stepIndex);
 
-				Logger::GetInstance().Log("DDCutDaemon::StartMilling() - Sending GCodeFile for operation with index: " + std::to_string(stepIndex));
+				DDLogger::Log("DDCutDaemon::StartMilling() - Sending GCodeFile for operation with index: " + std::to_string(stepIndex));
 				operation.Load();
 				pConnection->send(operation.GetGCodeFile());
 
@@ -448,7 +480,7 @@ bool DDCutDaemon::StartMilling(const int stepIndex) const
 				}
 
 				millingInProgress = true;
-				millingThread = std::thread(Thread_StartMilling, std::ref(*pJob), std::ref(operation));
+				millingThread = std::thread(Thread_StartMilling, m_lockHandle, std::ref(*pJob), std::ref(operation));
 
 				return true;
 			}

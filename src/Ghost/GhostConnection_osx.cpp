@@ -1,6 +1,6 @@
 #include "GhostConnection.h"
 
-#include "Logging/Logger.h"
+#include "DDLogger/DDLogger.h"
 
 #ifndef _WIN32
 #include <unistd.h>
@@ -10,7 +10,7 @@
 
 void GhostConnection::connectOS()
 {
-	Logger::GetInstance().Log("GhostConnection::connectOS() - MAC - File Path: " + m_ghostGunner.GetPath());
+	DDLogger::Log("GhostConnection::connectOS() - MAC - File Path: " + m_ghostGunner.GetPath());
     if ((m_file = open(m_ghostGunner.GetPath().c_str(), O_RDWR|O_NOCTTY|O_NDELAY)) < 0)
 	{
         const std::string error = strerror(errno);

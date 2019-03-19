@@ -8,7 +8,7 @@
 
 #include <RestClient/FileDownloader.h>
 #include <Files/DDFileManager.h>
-#include <Logging/Logger.h>
+#include <DDLogger/DDLogger.h>
 #include <Common/FileUtility.h>
 #include <Common/defines.h>
 #include <Common/OSUtility.h>
@@ -44,7 +44,7 @@ FirmwareVersion GhostFirmwareManager::GetFirmwareVersion(GhostConnection& connec
 	connection.WriteWithTimeout("$I\n", 300);
 
 	const std::string response = connection.ReadLineAndFlush();
-	Logger::GetInstance().Log("GhostFirmwareManager::GetFirmwareVersion() - Firmware Version returned: " + response);
+	DDLogger::Log("GhostFirmwareManager::GetFirmwareVersion() - Firmware Version returned: " + response);
 
 	// 4. Parse GG's Response
 
@@ -111,7 +111,7 @@ bool GhostFirmwareManager::LoadFirmware(GhostConnection& connection, const std::
     const std::string command = sysdir + "\\cmd.EXE /C " + path + "\"\\Drivers\\AVRdude\\avrdude.exe -U flash:w:..\\Firmware\\" + hexFileName + " :i -C \"" + execPath + "\\Drivers\\AVRdude\\avrdude.conf\" -v -p ATMEGA328P -b 115200 -c stk500 -P " + connection.GetPath();
     
     // 8. Execute command in new process
-    Logger::GetInstance().Log("GhostFirmwareManager::LoadFirmware - Executing Command.");
+    DDLogger::Log("GhostFirmwareManager::LoadFirmware - Executing Command.");
     if (!OSUtility::ExecuteCommandInNewProcess(newDirectory, command))
 	{
 		return false;

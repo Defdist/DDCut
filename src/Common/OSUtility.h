@@ -10,7 +10,7 @@ public:
 	static std::string GetExecPath();
 
 	// File access
-	static void WriteToFile(const OS_FILE file, const char* pc, const int num);
+	static bool WriteToFile(const OS_FILE file, const char* pc, const int num);
 	static int ReadFromFile(const OS_FILE file, char* pc, const int num);
     
     static bool ExecuteCommandInNewProcess(const std::string& directory, const std::string& command);
