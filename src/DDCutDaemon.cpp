@@ -148,8 +148,18 @@ DDFile* DDCutDaemon::GetDDFile() const
 bool DDCutDaemon::SetDDFile(const std::string& ddFilePath) const
 {
 	DDLogger::Log("DDCutDaemon::SetDDFile - " + ddFilePath);
-	DDFileManager::GetInstance().SetSelectedFile(ddFilePath);
-	return true;
+
+	DDFile* pDDFile = new DDFile(ddFilePath);
+	if (pDDFile->GetJobs().empty())
+	{
+		delete pDDFile;
+		return false;
+	}
+	else
+	{
+		DDFileManager::GetInstance().SetSelectedFile(pDDFile);
+		return true;
+	}
 }
 
 bool DDCutDaemon::IsValidDDFile(const std::string& ddFilePath) const

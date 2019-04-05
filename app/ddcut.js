@@ -111,7 +111,12 @@ ipc.on('open-file-dialog',
 		function (files) 
 		{
     		if (files)
-			{ 
+            {
+                ddcut.SetDDFile(files[0]);
+                if (ddcut.GetJobs().length == 0) {
+                    // TODO: Alert user that .dd file is invalid. Call Validate??
+                    ddcut.SetDDFile("");
+                }
 				//event.returnValue = files;
 				event.sender.send(returnEventName, files)
 			}

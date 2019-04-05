@@ -1,0 +1,85 @@
+import * as React from 'react';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import Routes from './Routes';
+import { Titlebar, Color } from '@inceldes/cet';
+import BottomToolbar from './components/BottomToolbar';
+
+const theme = createMuiTheme({
+    palette: {
+        secondary: {
+            main: "#069076",
+        },
+        primary: {
+            main: '#ffffff'
+        },
+        text: {
+            primary: "#ffffff",
+            secondary: "#cccccc",
+            disabled: "#444444"
+        },
+        background: {
+            paper: "#000000"
+        },
+    },
+    typography: {
+        useNextVariants: true,
+        // Use the system font instead of the default Roboto font.
+        fontFamily: [
+            '"Lato"',
+            'sans-serif'
+        ].join(',')
+    },
+    props: {
+        MuiButtonBase: {
+            disableRipple: true
+        },
+        MuiDialog: {
+            TransitionProps: {
+                enter: false,
+                exit: false,
+                timeout: 0
+            }
+        }
+    },
+    overrides: {
+        MuiFormControl: {
+            root: {
+                backgroundColor: '#555555',
+            },
+        },
+        MuiDialog: {
+            paper: {
+                border: '#FFFFFF 1px solid' 
+            }
+        }
+    }
+});
+
+export default class App extends React.Component {
+    componentWillMount() {
+        if (!this.props.data) {
+            new Titlebar({
+                backgroundColor: Color.fromHex('#333333'),
+                icon: './static/img/DD_icon.ico',
+                menu: null,
+                titleHorizontalAlignment: "left"
+            });
+        }
+    }
+
+    render() {
+        document.getElementsByClassName('window-appicon')[0].style.width = "20px";
+        document.getElementsByClassName('window-appicon')[0].style.height = "20px";
+        document.getElementsByClassName('window-appicon')[0].style.backgroundSize = "20px 20px";
+        document.getElementsByClassName('window-appicon')[0].style.marginLeft = "5px";
+
+        return (
+            <React.Fragment>
+                <MuiThemeProvider theme={theme}>
+                    <Routes />
+                    <BottomToolbar />
+                </MuiThemeProvider>
+            </React.Fragment>
+        );
+    }
+}

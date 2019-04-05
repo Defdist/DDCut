@@ -13,6 +13,8 @@ const maxFeedRate = settings.maxFeedRate;
 const DEBUG = electron.remote.getGlobal('DEBUG');
 
 var finished = false;
+var hasGCodes = false;
+var currentStep = 0;
 
 function PopulateSteps()
 {
@@ -21,8 +23,8 @@ function PopulateSteps()
 	for (var i = 0; i < steps.length; i++)
 	{
 		var step = steps[i];
-		
-		
+
+
 		var opt = document.createElement('option');
 		opt.value = i;
 		opt.text = step["Title"];
@@ -38,17 +40,52 @@ function ShowGCodes(gCodes)
 	setTimeout(function() { $("#GCode").html(gCodes); }, 0);
 }
 
-var hasGCodes = false;
-var currentStep = 0;
+function ShowImage()
+{
+	if ($("#ImageButton").hasClass("ToggledOff"))
+	{
+		$("#ImageButton").addClass("ToggledOn");
+		$("#ImageButton").removeClass("ToggledOff");
+
+		$("#RawButton").addClass("ToggledOff");
+		$("#RawButton").removeClass("ToggledOn");
+
+		$("#GCode").addClass("hidden");
+		$("#Image").removeClass("hidden");
+	}
+}
+
+function ShowRaw()
+{
+		if (!hasGCodes)
+		{
+			return;
+		}
+
+		if ($("#RawButton").hasClass("ToggledOff"))
+		{
+			$("#RawButton").addClass("ToggledOn");
+			$("#RawButton").removeClass("ToggledOff");
+
+			$("#ImageButton").addClass("ToggledOff");
+			$("#ImageButton").removeClass("ToggledOn");
+
+			$("#Image").addClass("hidden");
+			$("#GCode").removeClass("hidden");
+
+			const gCodes = $("#GCode").html();
+			ShowGCodes(gCodes);
+		}
+}
 
 function ShowStep(index)
 {
 	currentStep = index;
 	var stepInfo = ddcut.GetStep(index);
-		
+
 	$("#Title").text(stepInfo["Title"].toUpperCase());
 	$("#Description").text(stepInfo["Prompt"]);
-	
+
 	const gCodes = stepInfo["GCode"];
 	if (gCodes)
 	{
@@ -60,16 +97,15 @@ function ShowStep(index)
 	{
 		hasGCodes = false;
 		$("#Warning").addClass("hidden");
-		$("#GCode").html("<p style='font-size:16px; color: red; text-align: center;'><b>...NO G-CODE FILE ATTACHED TO STEP...</b></p>");
+		ShowImage();
 	}
-	
-	//console.log(stepInfo["Image"]);
-	document.getElementById("Image").src = 'data:image/jpeg;base64,' + stepInfo["Image"]/* hexToBase64(stepInfo["Image"])*/;
-	
+
+	document.getElementById("Image").src = 'data:image/jpeg;base64,' + stepInfo["Image"];
+
 	$("#Next").removeClass("hidden");
-	
+
 	$("#StepCount").html("Step " + (index + 1) + "/" + document.getElementById("stepsList").length);
-	
+
 	$("#MillingStatus").addClass("hidden");
 	$("#PreMilling").removeClass("hidden");
 }
@@ -79,7 +115,7 @@ function AddStepSelectionListener()
 	$('#stepsList').change(function(){
 		if (DEBUG)
 		{
-			var index = parseInt($(this).val());	
+			var index = parseInt($(this).val());
 			ShowStep(index);
 		}
 		else if (finished)
@@ -116,12 +152,12 @@ function CheckMillingStatus()
 	var stepIndex = parseInt($("#stepsList").val());
 	const percentage = ddcut.GetMillingStatus(stepIndex);
 	$("#OperationPercentage").html(percentage + "%");
-    document.getElementById("ProgressBarGreen").style.width = percentage + '%'; 
-	
+    document.getElementById("ProgressBarGreen").style.width = percentage + '%';
+
 	if (percentage == 100)
 	{
 		clearInterval(millingStatusIntervalId);
-		
+
 		if (pauseAfterGCode)
 		{
             // TODO: Handle this
@@ -142,14 +178,14 @@ function AddButtonListeners()
 	//
 	// Back to Main
 	//
-	document.getElementById("BackToMain").addEventListener("click", 
+	document.getElementById("BackToMain").addEventListener("click",
 		function(event)
 		{
 			// TODO: ddcut.AbortJob();
 			ShowSection("Dashboard");
 		}
 	);
-	
+
 	//
 	// Next
 	//
@@ -164,11 +200,11 @@ function AddButtonListeners()
 			ShowNextStep();
 		}
 	});
-	
+
 	//
 	// Start Milling "Cancel"
 	//
-	document.getElementById("StartMillingCancelButton").addEventListener("click", 
+	document.getElementById("StartMillingCancelButton").addEventListener("click",
 		function(event)
 		{
 			$("#StartMillingDialog").addClass("hidden");
@@ -177,11 +213,11 @@ function AddButtonListeners()
 			$("#PreMilling").removeClass("hidden");
 		}
 	);
-	
+
 	//
 	// Start Milling "Start"
 	//
-	document.getElementById("StartMillingStartButton").addEventListener("click", 
+	document.getElementById("StartMillingStartButton").addEventListener("click",
 		function(event)
 		{
 			$("#StartMillingDialog").addClass("hidden");
@@ -190,15 +226,15 @@ function AddButtonListeners()
 			$("#MillingStatus").removeClass("hidden");
 			$("#PreMilling").addClass("hidden");
 			$("#OperationPercentage").html("0%");
-            document.getElementById("ProgressBarGreen").style.width = 1 + '%'; 
+            document.getElementById("ProgressBarGreen").style.width = 1 + '%';
 			ddcut.StartMilling(stepIndex);
 			millingStatusIntervalId = setInterval(CheckMillingStatus, 100);
 		}
 	);
-	
+
 	//
 	// FeedRate Override
-	//	
+	//
 	if (showSlider)
 	{
 		$("#FeedRateOverride").removeClass("hidden");
@@ -206,60 +242,27 @@ function AddButtonListeners()
 		slider.setAttribute("max", maxFeedRate);
 		slider.value = ddcut.GetFeedRate();
 		console.log("Current feedrate: " + slider.value);
-		
+
 		slider.addEventListener("mouseup",
-			function(event) 
+			function(event)
 			{
 				console.log("Updating feedrate to: " + this.value);
-				ddcut.SetFeedRate(this.value); 
+				ddcut.SetFeedRate(this.value);
 			}
 		);
 	}
-	
+
 	//
 	// Image Toggle
 	//
-	document.getElementById("ImageButton").addEventListener("click",
-		function(event)
-		{
-			if ($("#ImageButton").hasClass("ToggledOff"))
-			{
-				$("#ImageButton").addClass("ToggledOn");
-				$("#ImageButton").removeClass("ToggledOff");
-				
-				$("#RawButton").addClass("ToggledOff");
-				$("#RawButton").removeClass("ToggledOn");
-				
-				$("#GCode").addClass("hidden");
-				$("#Image").removeClass("hidden");
-			}
-		}
-	);
-	
-	
+	document.getElementById("ImageButton").addEventListener("click", ShowImage);
+
+
 	//
 	// Raw Toggle
 	//
-	document.getElementById("RawButton").addEventListener("click",
-		function(event)
-		{
-			if ($("#RawButton").hasClass("ToggledOff"))
-			{
-				$("#RawButton").addClass("ToggledOn");
-				$("#RawButton").removeClass("ToggledOff");
-				
-				$("#ImageButton").addClass("ToggledOff");
-				$("#ImageButton").removeClass("ToggledOn");
-				
-				$("#Image").addClass("hidden");
-				$("#GCode").removeClass("hidden");
-				
-				const gCodes = $("#GCode").html();
-				ShowGCodes(gCodes);
-			}
-		}
-	);
-	
+	document.getElementById("RawButton").addEventListener("click", ShowRaw);
+
 	//
 	// Stop
 	//
@@ -267,33 +270,33 @@ function AddButtonListeners()
 		console.log("Stopping...");
 		ddcut.EmergencyStop();
 	});
-	
+
 	$("#StopText").click(function() {
 		console.log("Stopping...");
 		ddcut.EmergencyStop();
 	});
-	
-	
+
+
 	//
 	// Operation Complete
 	//
 	$("#Restart").click(function() {
 		ShowSection("Milling");
 	});
-	
+
 	$("#Open").click(function() {
 		ipc.send('open-file-dialog', 'SELECTED_FILE_MILLING');
 	});
 
 	var jobSelected = false;
-	
+
 	function ShowJobWindow()
 	{
-		let jobWindow = new BrowserWindow({width: 600, height: 380, frame: false, resizable: false, 
+		let jobWindow = new BrowserWindow({width: 600, height: 380, frame: false, resizable: false,
 			parent: electron.remote.getCurrentWindow(), modal: false, icon: path.join(__dirname, '../img/logo-white.png')});
 		jobWindow.setMenu(null);
 		jobWindow.on('closed', () => {
-			setTimeout(function() { 
+			setTimeout(function() {
 				if (jobSelected)
 				{
 					ShowSection("Milling");
@@ -317,17 +320,17 @@ function AddButtonListeners()
 				}
 			)
 		);
-		
+
 		//$("#Modal").removeClass('hidden');
-		
+
 		const jobs = ddcut.GetJobs();
-		jobWindow.webContents.on('did-finish-load', () => { 
+		jobWindow.webContents.on('did-finish-load', () => {
 			jobWindow.webContents.send("JOBS", jobs, "SELECTED_JOB_MILLING");
 		});
 	}
-	
+
 	ipc.removeAllListeners('SELECTED_JOB_MILLING');
-	ipc.on('SELECTED_JOB_MILLING', 
+	ipc.on('SELECTED_JOB_MILLING',
 		function (event, jobIndex)
 		{
 			ddcut.SetSelectedJob(jobIndex);
@@ -335,25 +338,25 @@ function AddButtonListeners()
 			//ShowSection("Milling");
 		}
 	);
-	
+
 	ipc.removeAllListeners('SELECTED_FILE_MILLING');
-	ipc.on('SELECTED_FILE_MILLING', 
+	ipc.on('SELECTED_FILE_MILLING',
 		function (event, path)
 		{
 			//const currentDDFile = ddcut.GetDDFile();
 			if (ddcut.IsValidDDFile(path))
 			{
 				ddcut.SetDDFile(path);
-				
+
 				ShowJobWindow();
 			}
 			else
 			{
-				// TODO: Alert user that .dd file is invalid. 
+				// TODO: Alert user that .dd file is invalid.
 			}
 		}
 	);
-	
+
 	$("#Back").click(function() {
 		// TODO: ddcut.AbortJob();
 		ShowSection("Dashboard");

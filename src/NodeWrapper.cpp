@@ -77,6 +77,7 @@ napi_value GetDDFile(napi_env env, napi_callback_info info)
 napi_value SetDDFile(napi_env env, napi_callback_info info)
 {
 	napi_status status;
+	napi_value result;
 
 	size_t argc = 1;
 	napi_value args[1];
@@ -86,9 +87,11 @@ napi_value SetDDFile(napi_env env, napi_callback_info info)
 	std::string ddFile;
 	NAPI_GET_STRING(env, args[0], ddFile)
 
-	DDCutDaemon::GetInstance().SetDDFile(ddFile);
+	const bool ddFileSet = DDCutDaemon::GetInstance().SetDDFile(ddFile);
+	status = napi_get_boolean(env, ddFileSet, &result);
+	ASSERT_STATUS(status)
 
-	return nullptr;
+	return result;
 }
 
 napi_value IsValidDDFile(napi_env env, napi_callback_info info)
@@ -206,6 +209,7 @@ napi_value GetJobs(napi_env env, napi_callback_info info)
 napi_value SelectJob(napi_env env, napi_callback_info info)
 {
 	napi_status status;
+	napi_value result;
 
 	size_t argc = 1;
 	napi_value args[1];
@@ -217,9 +221,12 @@ napi_value SelectJob(napi_env env, napi_callback_info info)
 	ASSERT_STATUS(status)
 
 	DDCutDaemon& daemon = DDCutDaemon::GetInstance();
-	daemon.SelectJob(jobIndex);
+	const bool success = daemon.SelectJob(jobIndex);
 
-	return nullptr;
+	status = napi_get_boolean(env, success, &result);
+	ASSERT_STATUS(status)
+
+	return result;
 }
 
 napi_value GetAllSteps(napi_env env, napi_callback_info info)
