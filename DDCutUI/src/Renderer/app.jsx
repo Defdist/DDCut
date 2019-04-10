@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { ipcRenderer } from 'electron';
 import Routes from './Routes';
 import { Titlebar, Color } from '@inceldes/cet';
 import BottomToolbar from './components/BottomToolbar';
@@ -56,6 +57,13 @@ const theme = createMuiTheme({
 });
 
 export default class App extends React.Component {
+    constructor() {
+        super();
+        this.state = {
+            ghostGunnerStatus: 0
+        };
+    }
+
     componentWillMount() {
         if (!this.props.data) {
             new Titlebar({
@@ -68,6 +76,17 @@ export default class App extends React.Component {
     }
 
     render() {
+        function updateStatus(event, newStatus) {
+            if (newStatus != this.state.ghostGunnerStatus) {
+                this.setState({
+                    ghostGunnerStatus: newStatus
+                });
+            }
+        }
+
+        ipcRenderer.removeAllListeners("DD_UpdateGGStatus");
+        ipcRenderer.on("DD_UpdateGGStatus", updateStatus.bind(this));
+
         document.getElementsByClassName('window-appicon')[0].style.width = "20px";
         document.getElementsByClassName('window-appicon')[0].style.height = "20px";
         document.getElementsByClassName('window-appicon')[0].style.backgroundSize = "20px 20px";
@@ -76,8 +95,8 @@ export default class App extends React.Component {
         return (
             <React.Fragment>
                 <MuiThemeProvider theme={theme}>
-                    <Routes />
-                    <BottomToolbar />
+                    <Routes status={this.state.ghostGunnerStatus} />
+                    <BottomToolbar status={this.state.ghostGunnerStatus} />
                 </MuiThemeProvider>
             </React.Fragment>
         );

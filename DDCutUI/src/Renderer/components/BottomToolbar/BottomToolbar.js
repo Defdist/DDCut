@@ -26,7 +26,7 @@ const styles = theme => ({
 });
 
 function BottomToolbar(props) {
-    const { classes } = props;
+    const { classes, status } = props;
 
     function openGhostGunnerNet() {
         shell.openExternal("https://ghostgunner.net/");
@@ -38,7 +38,7 @@ function BottomToolbar(props) {
                 <Toolbar>
                     <Grid container spacing={0} className={classes.root} alignItems="center">
                         <Grid item xs={3}>
-                            <Status />
+                            <Status status={status} />
                         </Grid>
                         <Grid item xs={9}>
                             <div className={classes.right}>
@@ -58,6 +58,7 @@ function BottomToolbar(props) {
 
 BottomToolbar.propTypes = {
     classes: PropTypes.object.isRequired,
+    status: PropTypes.number.isRequired
 };
 
 export default withStyles(styles)(BottomToolbar);

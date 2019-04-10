@@ -6,17 +6,23 @@ import Dashboard from './containers/Dashboard';
 import Milling from './containers/Milling';
 
 
-function Routes() {
+function Routes(props) {
+    const { status } = props;
+
     return (
         <Router>
             <ScrollToTop>
                 <Switch>
-                    <Route exact path='/' component={Dashboard} />
+                    <Route exact path='/' render={(props) => <Dashboard {...props} status={status} />} />
                     <Route exact path='/milling' component={Milling} />
                 </Switch>
             </ScrollToTop>
         </Router>
     );
 }
+
+Routes.propTypes = {
+    status: PropTypes.number.isRequired
+};
 
 export default (Routes);

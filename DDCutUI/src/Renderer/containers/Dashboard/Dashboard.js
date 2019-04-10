@@ -58,24 +58,26 @@ const styles = theme => ({
 });
 
 function Dashboard(props) {
-    const { classes } = props;
+    const { classes, status } = props;
     const [availableJobs, setAvailableJobs] = React.useState(new Array());
     const [showJobSelection, setShowJobSelection] = React.useState(false);
     const [navigateToMilling, setNavigateToMilling] = React.useState(false);
 
     function onClickRun() {
-        ipcRenderer.removeAllListeners("Jobs::JobSelected");
-        ipcRenderer.on("Jobs::JobSelected", (event) => {
-            setNavigateToMilling(true);
-        });
+        if (status == 2) {
+            ipcRenderer.removeAllListeners("Jobs::JobSelected");
+            ipcRenderer.on("Jobs::JobSelected", (event) => {
+                setNavigateToMilling(true);
+            });
 
-        ipcRenderer.removeAllListeners("ShowJobSelection");
-        ipcRenderer.on("ShowJobSelection", (event, jobs) => {
-            setAvailableJobs(jobs);
-            setShowJobSelection(true);
-        });
+            ipcRenderer.removeAllListeners("ShowJobSelection");
+            ipcRenderer.on("ShowJobSelection", (event, jobs) => {
+                setAvailableJobs(jobs);
+                setShowJobSelection(true);
+            });
 
-        ipcRenderer.send('File::OpenFileDialog');
+            ipcRenderer.send('File::OpenFileDialog');
+        }
     }
 
     function onCloseJobSelection(event) {
@@ -88,6 +90,27 @@ function Dashboard(props) {
 
     if (navigateToMilling) {
         return (<Redirect to='/milling' />);
+    }
+
+    function getRunImage() {
+        if (status == 2) {
+            return (
+                <img
+                    style={{ marginTop: '20px', height: '14vh' }}
+                    src={path.join(__dirname, '../../static/img/run.png')}
+                    onMouseOver={e => e.currentTarget.src = path.join(__dirname, '../../static/img/run_hover.png')}
+                    onMouseOut={e => e.currentTarget.src = path.join(__dirname, '../../static/img/run.png')}
+                    onClick={onClickRun}
+                />
+            );
+        } else {
+            return (
+                <img
+                    style={{ marginTop: '20px', height: '14vh' }}
+                    src={path.join(__dirname, '../../static/img/run.png')}
+                />
+            );
+        }
     }
 
     return (
@@ -125,14 +148,8 @@ function Dashboard(props) {
                     </Grid>
                     <Grid item xs={4}>
                         <center>
-                            <Button style={{ backgroundColor: "transparent" }}>
-                                <img
-                                    style={{ marginTop: '20px', height: '14vh' }}
-                                    src={path.join(__dirname, '../../static/img/run.png')}
-                                    onMouseOver={e => e.currentTarget.src = path.join(__dirname, '../../static/img/run_hover.png')}
-                                    onMouseOut={e => e.currentTarget.src = path.join(__dirname, '../../static/img/run.png')}
-                                    onClick={onClickRun}
-                                />
+                            <Button style={{ backgroundColor: "transparent" }} disabled={status != 2}>
+                                {getRunImage()}
                             </Button>
                         </center>
                     </Grid>
@@ -157,6 +174,7 @@ function Dashboard(props) {
 
 Dashboard.propTypes = {
     classes: PropTypes.object.isRequired,
+    status: PropTypes.number.isRequired
 };
 
 export default withStyles(styles)(Dashboard);

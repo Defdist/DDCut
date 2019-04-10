@@ -21,15 +21,15 @@ const styles = theme => ({
 });
 
 function Status(props) {
-    const { classes } = props;
-    const [ghostGunnerStatus, setGhostGunnerStatus] = React.useState(0);
+    const { classes, status } = props;
+    //const [ghostGunnerStatus, setGhostGunnerStatus] = React.useState(0);
 
-    ipcRenderer.removeAllListeners("DD_UpdateGGStatus");
+    /*ipcRenderer.removeAllListeners("DD_UpdateGGStatus");
     ipcRenderer.on("DD_UpdateGGStatus", function (event, newStatus) {
         if (newStatus != ghostGunnerStatus) {
             setGhostGunnerStatus(newStatus);
         }
-    });
+    });*/
 
 
     const statusTheme = createMuiTheme({
@@ -45,9 +45,9 @@ function Status(props) {
     function getColor() {
         var color = "error";
 
-        if (ghostGunnerStatus == 1) {
+        if (status == 1) {
             color = "secondary";
-        } else if (ghostGunnerStatus == 2) {
+        } else if (status == 2) {
             color = "primary";
         }
 
@@ -57,9 +57,9 @@ function Status(props) {
     function getStatusText() {
         var statusText = "Not Connected";
 
-        if (ghostGunnerStatus == 1) {
+        if (status == 1) {
             statusText = "Connecting";
-        } else if (ghostGunnerStatus == 2) {
+        } else if (status == 2) {
             statusText = "Connected";
         }
 
@@ -91,7 +91,8 @@ function Status(props) {
 }
 
 Status.propTypes = {
-    classes: PropTypes.object.isRequired
+    classes: PropTypes.object.isRequired,
+    status: PropTypes.number.isRequired
 };
 
 export default withStyles(styles)(Status);
