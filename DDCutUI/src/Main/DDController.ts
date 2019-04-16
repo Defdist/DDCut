@@ -4,6 +4,7 @@ import SettingsAPI from './API/SettingsAPI';
 import FirmwareAPI from './API/FirmwareAPI';
 import FileAPI from './API/FileAPI';
 import JobsAPI from './API/JobsAPI';
+import SupportAPI from './API/SupportAPI';
 
 const globalAny: any = global;
 var mainWindow = null;
@@ -15,6 +16,7 @@ function InitializeAPIs() {
     FirmwareAPI.Initialize();
     FileAPI.Initialize();
     JobsAPI.Initialize();
+    SupportAPI.Initialize();
 };
 
 

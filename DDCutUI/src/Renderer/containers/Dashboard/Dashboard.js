@@ -7,6 +7,7 @@ import path from "path";
 import { ipcRenderer, shell } from "electron";
 import JobSelection from '../../components/Modals/JobSelection';
 import { Redirect } from 'react-router-dom';
+import CustomerSupport from '../../components/Modals/CustomerSupport';
 
 const styles = theme => ({
     main: {
@@ -62,6 +63,7 @@ function Dashboard(props) {
     const [availableJobs, setAvailableJobs] = React.useState(new Array());
     const [showJobSelection, setShowJobSelection] = React.useState(false);
     const [navigateToMilling, setNavigateToMilling] = React.useState(false);
+    const [openCustomerSupport, setOpenCustomerSupport] = React.useState(false);
 
     function onClickRun() {
         if (status == 2) {
@@ -85,7 +87,7 @@ function Dashboard(props) {
     }
 
     function onClickHelp() {
-
+        setOpenCustomerSupport(true);
     }
 
     if (navigateToMilling) {
@@ -168,6 +170,8 @@ function Dashboard(props) {
                     </Grid>
                 </Grid>
             </div>
+
+            <CustomerSupport open={openCustomerSupport} onClose={() => { setOpenCustomerSupport(false) }} />
         </section>
     );
 }

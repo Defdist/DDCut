@@ -2,7 +2,7 @@ import * as React from 'react';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import { ipcRenderer } from 'electron';
 import Routes from './Routes';
-import { Titlebar, Color } from '@inceldes/cet';
+import { Titlebar, Color } from 'custom-electron-titlebar';
 import BottomToolbar from './components/BottomToolbar';
 
 const theme = createMuiTheme({
@@ -11,7 +11,9 @@ const theme = createMuiTheme({
             main: "#069076",
         },
         primary: {
-            main: '#ffffff'
+            main: '#ffffff',
+            dark: '#888888',
+            dark: '#333333',
         },
         text: {
             primary: "#ffffff",

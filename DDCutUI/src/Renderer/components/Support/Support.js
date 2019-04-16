@@ -1,13 +1,26 @@
 import React from "react";
 import PropTypes from "prop-types";
-import {
-    Button, Dialog, DialogActions, DialogContent,
-    DialogContentText, DialogTitle, Fab
-} from "@material-ui/core";
 import path from "path";
+import { shell } from 'electron';
+import {
+    Fab, Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem
+} from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
+import CustomerSupport from '../Modals/CustomerSupport';
 
 const styles = theme => ({
+    root: {
+        display: 'flex',
+    },
+    paper: {
+        marginBottom: '5px',
+        border: '#FFFFFF 1px solid',
+    },
+    menuItem: {
+        '&:hover': {
+            backgroundColor: theme.palette.primary.dark
+        },
+    },
     supportButton: {
         paddingTop: 0,
         paddingBottom: 0,
@@ -24,55 +37,102 @@ const styles = theme => ({
     }
 });
 
-function Support(props) {
-    const { classes } = props;
-    const [open, setOpen] = React.useState(false);
+class Support extends React.Component {
+    constructor() {
+        super();
+        this.state = {
+            openDialog: false,
+            openMenu: false,
+        };
 
-    function handleClickOpen() {
-        setOpen(true);
+        this.anchor = React.createRef();
+        this.handleToggleMenu = this.handleToggleMenu.bind(this);
+        this.handleCloseMenu = this.handleCloseMenu.bind(this);
+        this.handleOpenDialog = this.handleOpenDialog.bind(this);
+        this.handleCloseDialog = this.handleCloseDialog.bind(this);
     }
 
-    function handleClose() {
-        setOpen(false);
+    handleToggleMenu() {
+        this.setState({
+            openMenu: !this.state.openMenu
+        });
     }
 
-    return (
-        <React.Fragment>
-            <Fab
-                variant="extended"
-                aria-label="Support"
-                onClick={handleClickOpen}
-                className={classes.supportButton}
-                size="small"
-            >
-                <img src={path.join(__dirname, '../../static/img/support_button.png')} className={classes.supportImg} /> 
-            </Fab>
+    handleCloseMenu(event) {
+        if (this.anchor.contains(event.target)) {
+            return;
+        }
 
-            <Dialog
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="form-dialog-title"
-            >
-                <DialogTitle id="form-dialog-title">Support</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        To subscribe to this website, please enter your email address here.
-                        We will send updates occasionally.
-                    </DialogContentText>
+        this.setState({
+            openMenu: false
+        });
+    }
 
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose} color="primary">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleClose} color="primary">
-                        Subscribe
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        </React.Fragment>
-    );
-}
+    handleOpenDialog() {
+        this.setState({
+            openDialog: true,
+            openMenu: false
+        });
+    }
+
+    handleCloseDialog() {
+        this.setState({
+            openDialog: false
+        });
+    }
+
+    render() {
+        const { classes } = this.props;
+
+        function onClickViewManual(event) {
+            shell.openExternal(__dirname + '/../../../../doc/GG2Manual.pdf');
+            this.handleCloseMenu(event);
+        }
+
+        function onClickVisitSupport(event) {
+            shell.openExternal("https://ghostgunner.net/");
+            this.handleCloseMenu(event);
+        }
+
+        return (
+            <React.Fragment>
+                <Fab
+                    variant="extended"
+                    aria-label="Support"
+                    onClick={this.handleToggleMenu}
+                    className={classes.supportButton}
+                    size="small"
+                    buttonRef={node => { this.anchor = node }}
+                >
+                    <img src={path.join(__dirname, '../../static/img/support_button.png')} className={classes.supportImg} />
+                </Fab>
+
+                <Popper open={this.state.openMenu} anchorEl={this.anchor} transition disablePortal>
+                    {({ TransitionProps, placement }) => (
+                        <Grow
+                            {...TransitionProps}
+                            id="menu-list-grow"
+                            style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}
+                        >
+                            <Paper className={classes.paper}>
+                                <ClickAwayListener onClickAway={this.handleCloseMenu}>
+                                    <MenuList>
+                                        <MenuItem className={classes.menuItem} onClick={this.handleCloseMenu}>'How to' Walkthrough</MenuItem>
+                                        <MenuItem className={classes.menuItem} onClick={onClickViewManual.bind(this)}>View Manual</MenuItem>
+                                        <MenuItem className={classes.menuItem} onClick={onClickVisitSupport.bind(this)}>Visit Support Page</MenuItem>
+                                        <MenuItem className={classes.menuItem} onClick={this.handleOpenDialog}>Customer Support Request</MenuItem>
+                                    </MenuList>
+                                </ClickAwayListener>
+                            </Paper>
+                        </Grow>
+                    )}
+                </Popper>
+
+                <CustomerSupport open={this.state.openDialog} onClose={this.handleCloseDialog} />
+            </React.Fragment>
+        );
+    }
+};
 
 Support.propTypes = {
     classes: PropTypes.object.isRequired
