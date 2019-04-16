@@ -16,10 +16,10 @@
     "install": "run-script-os",
     "install:darwin:linux": "ncmake build --output=./darwin && copyfiles --flat darwin/release/* app/node/",
     "install:win32": "cd build/win32 && cmake --build . --config Release && copyfiles --flat bin/release/* ../../app/node/",
-    "start": "electron ./app",
+    "start": "electron ./DDCutUI",
     "package": "run-script-os",
     "package:darwin:linux": "npm install && electron-packager ./app --out=dist --overwrite",
-    "package:win32": "npm install && cd app && npm install && electron-packager . --arch=ia32 --out=../dist --overwrite --icon=UI/img/logo.ico --prune=true --no-asar && cd .. && copyfiles Drivers/** dist/ddcut2-win32-ia32/",
+    "package:win32": "npm install && cd DDCutUI && npm install && electron-packager . --arch=ia32 --out=../dist --overwrite --icon=UI/img/logo.ico --prune=true --no-asar && cd .. && copyfiles Drivers/** dist/ddcut2-win32-ia32/",
     "installer": "node package.js"
   },
   "devDependencies": {

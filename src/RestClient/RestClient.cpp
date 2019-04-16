@@ -136,7 +136,7 @@ RestResponse RestClient::WriteRequest()
 	auto read = asio::read(m_socket, m_response, err);
 	//auto read = asio::read_until(m_socket, m_response, "\r\n", err);
 
-	if (err && err.value() != 335544539)
+	if (err && err.value() != 335544539 && err.value() != 1)
 	{
 		return RestResponse(0, err.message(), "");
 	}
