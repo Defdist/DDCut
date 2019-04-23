@@ -4,6 +4,7 @@ import SettingsAPI from './API/SettingsAPI';
 import FirmwareAPI from './API/FirmwareAPI';
 import FileAPI from './API/FileAPI';
 import JobsAPI from './API/JobsAPI';
+import LogsAPI from './API/LogsAPI';
 import SupportAPI from './API/SupportAPI';
 
 const globalAny: any = global;
@@ -16,6 +17,7 @@ function InitializeAPIs() {
     FirmwareAPI.Initialize();
     FileAPI.Initialize();
     JobsAPI.Initialize();
+    LogsAPI.Initialize();
     SupportAPI.Initialize();
 };
 

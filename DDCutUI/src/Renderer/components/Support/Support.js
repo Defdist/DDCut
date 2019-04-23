@@ -7,6 +7,7 @@ import {
 } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import CustomerSupport from '../Modals/CustomerSupport';
+import ViewLogs from '../Modals/ViewLogs';
 
 const styles = theme => ({
     root: {
@@ -43,6 +44,7 @@ class Support extends React.Component {
         this.state = {
             openDialog: false,
             openMenu: false,
+            openLogViewer: false,
         };
 
         this.anchor = React.createRef();
@@ -50,6 +52,8 @@ class Support extends React.Component {
         this.handleCloseMenu = this.handleCloseMenu.bind(this);
         this.handleOpenDialog = this.handleOpenDialog.bind(this);
         this.handleCloseDialog = this.handleCloseDialog.bind(this);
+        this.handleShowLogs = this.handleShowLogs.bind(this);
+        this.handleCloseLogViewer = this.handleCloseLogViewer.bind(this);
     }
 
     handleToggleMenu() {
@@ -78,6 +82,20 @@ class Support extends React.Component {
     handleCloseDialog() {
         this.setState({
             openDialog: false
+        });
+    }
+
+    handleShowLogs() {
+        this.setState({
+            openMenu: false,
+            openLogViewer: true
+        });
+    }
+
+    handleCloseLogViewer() {
+        this.setState({
+            openMenu: false,
+            openLogViewer: false
         });
     }
 
@@ -121,6 +139,7 @@ class Support extends React.Component {
                                         <MenuItem className={classes.menuItem} onClick={onClickViewManual.bind(this)}>View Manual</MenuItem>
                                         <MenuItem className={classes.menuItem} onClick={onClickVisitSupport.bind(this)}>Visit Support Page</MenuItem>
                                         <MenuItem className={classes.menuItem} onClick={this.handleOpenDialog}>Customer Support Request</MenuItem>
+                                        <MenuItem className={classes.menuItem} onClick={this.handleShowLogs}>Show Logs</MenuItem>
                                     </MenuList>
                                 </ClickAwayListener>
                             </Paper>
@@ -129,6 +148,7 @@ class Support extends React.Component {
                 </Popper>
 
                 <CustomerSupport open={this.state.openDialog} onClose={this.handleCloseDialog} />
+                <ViewLogs open={this.state.openLogViewer} onClose={this.handleCloseLogViewer} />
             </React.Fragment>
         );
     }

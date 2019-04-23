@@ -12,6 +12,7 @@
 namespace DDLogger
 {
 	DD_LOGGER_API bool Log(const std::string& eventText);
+	DD_LOGGER_API std::string GetLogPath();
 	DD_LOGGER_API std::string ReadLog();
 	DD_LOGGER_API void Flush();
 }

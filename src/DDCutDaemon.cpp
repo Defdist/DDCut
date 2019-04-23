@@ -400,6 +400,11 @@ std::unique_ptr<CustServiceReqError> DDCutDaemon::SendCustomerSupportRequest(con
 	}
 }
 
+std::string DDCutDaemon::GetLogPath() const
+{
+	return DDLogger::GetLogPath();
+}
+
 std::unique_ptr<SoftwareUpdateStatus> DDCutDaemon::CheckForUpdates() const
 {
 	DDLogger::Log("DDCutDaemon::CheckForUpdates() - Checking for updates.");

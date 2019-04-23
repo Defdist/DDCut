@@ -142,8 +142,12 @@ class Milling extends React.Component {
         function handleStop(event) {
             ipcRenderer.send("Jobs::EmergencyStop");
             clearInterval(this.timer);
+
+            // TODO: Show dialog
             this.setState({
-                millingProgress: -1
+                millingProgress: -1,
+                selectedStepIndex: 0,
+                selectedStep: ipcRenderer.sendSync("Jobs::GetStep", 0)
             });
         }
 

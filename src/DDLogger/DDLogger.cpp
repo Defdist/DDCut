@@ -8,6 +8,11 @@ namespace DDLogger
 		return Logger::GetInstance().Log(eventText);
 	}
 
+	DD_LOGGER_API std::string GetLogPath()
+	{
+		return Logger::GetLogPath();
+	}
+
 	DD_LOGGER_API std::string ReadLog()
 	{
 		return Logger::GetInstance().ReadLog();

@@ -1041,6 +1041,19 @@ napi_value InstallUpdates(napi_env env, napi_callback_info info)
 	return nullptr;
 }
 
+napi_value GetLogPath(napi_env env, napi_callback_info info)
+{
+	DDCutDaemon& daemon = DDCutDaemon::GetInstance();
+
+	const std::string logPath = daemon.GetLogPath();
+
+	napi_value logPathStr;
+	napi_status status = napi_create_string_utf8(env, logPath.c_str(), logPath.size(), &logPathStr);
+	ASSERT_STATUS(status)
+
+	return logPathStr;
+}
+
 napi_value Shutdown(napi_env env, napi_callback_info info)
 {
 	DDCutDaemon::GetInstance().Shutdown();
@@ -1056,7 +1069,7 @@ napi_value Init(napi_env env, napi_value exports)
 	DDCutDaemon::GetInstance();
 
 	napi_status status;
-	napi_property_descriptor descriptors[32] = {
+	napi_property_descriptor descriptors[33] = {
 		DECLARE_NAPI_METHOD("Initialize", InitializeDaemon),
 		DECLARE_NAPI_METHOD("Shutdown", Shutdown),
 
@@ -1103,10 +1116,13 @@ napi_value Init(napi_env env, napi_value exports)
 
 		// Updates
 		DECLARE_NAPI_METHOD("CheckForUpdates", CheckForUpdates),
-		DECLARE_NAPI_METHOD("InstallUpdates", InstallUpdates)
+		DECLARE_NAPI_METHOD("InstallUpdates", InstallUpdates),
+
+		// Logs
+		DECLARE_NAPI_METHOD("GetLogPath", GetLogPath)
 	};
 
-	status = napi_define_properties(env, exports, 32, descriptors);
+	status = napi_define_properties(env, exports, 33, descriptors);
 	ASSERT_STATUS(status)
 	return exports;
 }

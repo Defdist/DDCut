@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var DDCut = require('../../../Backend/ddcut.node');
 var electron_1 = require("electron");
 var path = require('path');
+var fs = require('fs');
 var FileAPI = /** @class */ (function () {
     function FileAPI() {
     }
@@ -23,6 +24,12 @@ var FileAPI = /** @class */ (function () {
                         event.sender.send("InvalidDDFile", files[0]);
                     }
                 }
+            });
+        });
+        electron_1.ipcMain.on("File::ReadFile", function (event, fileName) {
+            console.log("Reading file: " + fileName);
+            fs.readFile(fileName, 'utf-8', function (err, data) {
+                event.sender.send('File::FileOpened', data);
             });
         });
     };

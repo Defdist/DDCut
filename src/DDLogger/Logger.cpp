@@ -17,10 +17,15 @@ Logger::Logger()
 	const bool success = FileUtility::MakeDirectory(OSUtility::GetExecPath(), "logs");
 	if (success)
 	{
-		auto sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(OSUtility::GetExecPath() + "/logs/ddcut.log", 1024 * 1024, 5);
+		auto sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(GetLogPath(), 1024 * 1024, 5);
 		m_logger = spdlog::create_async("LOGGER", sink, 8192, spdlog::async_overflow_policy::block_retry, nullptr, std::chrono::seconds(2));
 		m_logger->log(spdlog::level::level_enum::info, OSUtility::GetExecPath());
 	}
+}
+
+std::string Logger::GetLogPath()
+{
+	return OSUtility::GetExecPath() + "/logs/ddcut.log";
 }
 
 bool Logger::Log(const std::string& eventText)

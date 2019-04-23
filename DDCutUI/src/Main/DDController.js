@@ -5,6 +5,7 @@ var SettingsAPI_1 = require("./API/SettingsAPI");
 var FirmwareAPI_1 = require("./API/FirmwareAPI");
 var FileAPI_1 = require("./API/FileAPI");
 var JobsAPI_1 = require("./API/JobsAPI");
+var LogsAPI_1 = require("./API/LogsAPI");
 var SupportAPI_1 = require("./API/SupportAPI");
 var globalAny = global;
 var mainWindow = null;
@@ -14,6 +15,7 @@ function InitializeAPIs() {
     FirmwareAPI_1.default.Initialize();
     FileAPI_1.default.Initialize();
     JobsAPI_1.default.Initialize();
+    LogsAPI_1.default.Initialize();
     SupportAPI_1.default.Initialize();
 }
 ;

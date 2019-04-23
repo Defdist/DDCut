@@ -1,6 +1,7 @@
 const DDCut = require('../../../Backend/ddcut.node');
 import { ipcMain, Event, dialog } from 'electron';
 const path = require('path');
+const fs = require('fs');
 
 class FileAPI {
     static Initialize() {
@@ -23,6 +24,13 @@ class FileAPI {
                     }
                 }
             )
+        });
+
+        ipcMain.on("File::ReadFile", function (event: Event, fileName: string) {
+            console.log("Reading file: " + fileName);
+            fs.readFile(fileName, 'utf-8', function (err, data) {
+                event.sender.send('File::FileOpened', data);
+            });
         });
     };
 }
