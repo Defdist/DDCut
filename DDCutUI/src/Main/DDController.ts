@@ -3,6 +3,7 @@ import { ipcMain, BrowserWindow } from 'electron';
 import SettingsAPI from './API/SettingsAPI';
 import FirmwareAPI from './API/FirmwareAPI';
 import FileAPI from './API/FileAPI';
+import GhostGunnerAPI from './API/GhostGunnerAPI';
 import JobsAPI from './API/JobsAPI';
 import LogsAPI from './API/LogsAPI';
 import SupportAPI from './API/SupportAPI';
@@ -16,6 +17,7 @@ function InitializeAPIs() {
     SettingsAPI.Initialize();
     FirmwareAPI.Initialize();
     FileAPI.Initialize();
+    GhostGunnerAPI.Initialize();
     JobsAPI.Initialize();
     LogsAPI.Initialize();
     SupportAPI.Initialize();
@@ -51,6 +53,12 @@ class DDController {
         clearInterval(connectionStatusIntervalId);
         DDCut.Shutdown();
     };
+
+	static SetMillingStatus(milling: boolean) {
+		if (mainWindow != null) {
+            mainWindow.webContents.send("Milling::Status", milling);
+		}
+	}
 }
 
 export default DDController;

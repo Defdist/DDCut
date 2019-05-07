@@ -33,6 +33,16 @@ void GhostGunnerManager::SetSelectedGhostGunner(GhostConnection* pGhostConnectio
 	m_selectedGhostGunner = pGhostConnection;
 }
 
+bool GhostGunnerManager::IsSelectedGhostGunner(const GhostGunner& ghostGunner) const
+{
+	if (m_selectedGhostGunner != nullptr)
+	{
+		return m_selectedGhostGunner->GetGhostGunner() == ghostGunner;
+	}
+
+	return false;
+}
+
 void GhostGunnerManager::ShutdownGhostGunner(Job* pJob, Operation* pOperation)
 {
 	if (m_selectedGhostGunner != nullptr && m_selectedGhostGunner->IsConnected())
@@ -60,9 +70,6 @@ bool GhostGunnerManager::ReadWriteCycle(Job* pJob, Operation* pOperation, const 
 	// Uses pOperation, ps->filesize, ps->abortJob
 	try
 	{
-		bool hit, cleanup = true;
-		std::string s;
-
 		if (pOperation != nullptr && pOperation->GetTimeout() > 0)
 		{
 			DDLogger::Log("GhostGunnerManager::ReadWriteCycle - Using operation timeout: " + std::to_string(pOperation->GetTimeout()));
@@ -76,6 +83,7 @@ bool GhostGunnerManager::ReadWriteCycle(Job* pJob, Operation* pOperation, const 
 
 		m_selectedGhostGunner->ResetIdleTime();
 
+		bool cleanup = true;
 		while (true)
 		{
 			if (!m_selectedGhostGunner->WriteCache())
@@ -92,16 +100,17 @@ bool GhostGunnerManager::ReadWriteCycle(Job* pJob, Operation* pOperation, const 
 				}
 			}
 
-			hit = false;
+			bool sleep = true;
+			std::string s;
 			while (m_selectedGhostGunner->ReadLine(s))
 			{
-				hit = true;
+				sleep = false;
 				DDLogger::Log("GhostGunnerManager::ReadWriteCycle - Line read: [" + s + "]");
 			}
 
 			m_selectedGhostGunner->UpdateFeedRate();
 
-			if (!hit)
+			if (sleep)
 			{
 				Sleep(10);
 			}
@@ -117,17 +126,13 @@ bool GhostGunnerManager::ReadWriteCycle(Job* pJob, Operation* pOperation, const 
 			DDLogger::Log("GhostGunnerManager::ReadWriteCycle - Timeout exceeded.");
 			return false;
 		}
-		else
+		else if (pJob != nullptr && pOperation->GetReset())
 		{
-			if (pJob != nullptr && pOperation->GetReset())
-			{
-				DDLogger::Log("GhostGunnerManager::ReadWriteCycle - Calling reset().");
-				m_selectedGhostGunner->reset();
-			}
-
-			return true;
+			DDLogger::Log("GhostGunnerManager::ReadWriteCycle - Calling reset().");
+			m_selectedGhostGunner->reset();
 		}
 
+		return true;
 	}
 	catch (GhostException& e)
 	{

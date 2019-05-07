@@ -7,10 +7,7 @@ var FileAPI = /** @class */ (function () {
     }
     FileAPI.Initialize = function () {
         electron_1.ipcMain.on('Logs::GetLogFile', function (event) {
-            console.log("GetLogFile");
-            var logPath = DDCut.GetLogPath();
-            console.log(logPath);
-            event.returnValue = logPath;
+            event.returnValue = DDCut.GetLogPath();
         });
     };
     ;

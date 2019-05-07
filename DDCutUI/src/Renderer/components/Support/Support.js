@@ -100,7 +100,7 @@ class Support extends React.Component {
     }
 
     render() {
-        const { classes } = this.props;
+        const { classes, disabled } = this.props;
 
         function onClickViewManual(event) {
             shell.openExternal(__dirname + '/../../../../doc/GG2Manual.pdf');
@@ -111,6 +111,18 @@ class Support extends React.Component {
             shell.openExternal("https://ghostgunner.net/");
             this.handleCloseMenu(event);
         }
+
+		function onClickOpenDialog() {
+			if (!disabled) {
+				this.handleOpenDialog();
+			}
+		}
+
+		function onClickShowLogs() {
+			if (!disabled) {
+				this.handleShowLogs();
+			}
+		}
 
         return (
             <React.Fragment>
@@ -138,8 +150,8 @@ class Support extends React.Component {
                                         <MenuItem className={classes.menuItem} onClick={this.handleCloseMenu}>'How to' Walkthrough</MenuItem>
                                         <MenuItem className={classes.menuItem} onClick={onClickViewManual.bind(this)}>View Manual</MenuItem>
                                         <MenuItem className={classes.menuItem} onClick={onClickVisitSupport.bind(this)}>Visit Support Page</MenuItem>
-                                        <MenuItem className={classes.menuItem} onClick={this.handleOpenDialog}>Customer Support Request</MenuItem>
-                                        <MenuItem className={classes.menuItem} onClick={this.handleShowLogs}>Show Logs</MenuItem>
+                                        <MenuItem className={classes.menuItem} onClick={onClickOpenDialog.bind(this)}>Customer Support Request</MenuItem>
+                                        <MenuItem className={classes.menuItem} onClick={onClickShowLogs.bind(this)}>Show Logs</MenuItem>
                                     </MenuList>
                                 </ClickAwayListener>
                             </Paper>
@@ -155,7 +167,8 @@ class Support extends React.Component {
 };
 
 Support.propTypes = {
-    classes: PropTypes.object.isRequired
+    classes: PropTypes.object.isRequired,
+    disabled: PropTypes.bool.isRequired
 };
 
 export default withStyles(styles)(Support);

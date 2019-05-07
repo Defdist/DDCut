@@ -5,8 +5,9 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import StepList from '../../components/StepList';
 import ImageRaw from '../../components/ImageRaw';
 import StartMilling from '../../components/Modals/StartMilling';
+import Alert from '../../components/Modals/Alert';
 import path from "path";
-import { Button, IconButton, Typography, LinearProgress } from '@material-ui/core';
+import { Button, IconButton, Typography, LinearProgress, Grid } from '@material-ui/core';
 import { Redirect } from 'react-router-dom';
 
 const styles = theme => ({
@@ -57,6 +58,22 @@ const styles = theme => ({
         height: 'calc(100% - 160px)',
         marginTop: '110px',
         marginLeft: 'calc(58% + 10px)',
+    },
+    prev: {
+		float: 'left',
+		padding: '5px'
+        //marginLeft: -2 * theme.spacing.unit
+    },
+    next: {
+		float: 'right',
+		padding: '5px'
+        //marginLeft: 2 * theme.spacing.unit
+    },
+    stepNumber: {
+        marginTop: '6px',
+        opacity: 0.87,
+        fontSize: '14px',
+        color: '#9f9f9f'
     }
 });
 
@@ -67,10 +84,13 @@ class Milling extends React.Component {
             steps: ipcRenderer.sendSync("Jobs::GetSteps"),
             selectedStepIndex: 0,
             selectedStep: ipcRenderer.sendSync("Jobs::GetStep", 0),
+			previousMillingStep: 0,
             showImage: true,
             showStartMilling: false,
             goBack: false,
-            millingProgress: -1
+            millingProgress: -1,
+			showAlert: false,
+			alertMessage: ""
         };
     }
 
@@ -101,6 +121,26 @@ class Milling extends React.Component {
         }
     }
 
+    showPrevStep(milling) {
+        const prevStepIndex = (milling.state.selectedStepIndex - 1);
+        milling.setState({
+            showStartMilling: false,
+            millingProgress: -1,
+            selectedStepIndex: prevStepIndex,
+            selectedStep: ipcRenderer.sendSync("Jobs::GetStep", prevStepIndex)
+        });
+    }
+
+    skipToNextMillingStep(milling) {
+        const stepIndex = milling.state.selectedStep.next_milling_step;
+        milling.setState({
+            showStartMilling: false,
+            millingProgress: -1,
+            selectedStepIndex: stepIndex,
+            selectedStep: ipcRenderer.sendSync("Jobs::GetStep", stepIndex)
+        });
+    }
+
     render() {
         const { classes } = this.props;
 
@@ -129,6 +169,10 @@ class Milling extends React.Component {
             return "";
         }
 
+        function handlePrev(event) {
+			this.showPrevStep(this);
+        }
+
         function handleNext(event) {
             if (this.state.selectedStep.GCode != null) {
                 this.setState({
@@ -139,15 +183,21 @@ class Milling extends React.Component {
             }
         }
 
+		function handleSkip(event) {
+			this.skipToNextMillingStep(this);
+		}
+
         function handleStop(event) {
             ipcRenderer.send("Jobs::EmergencyStop");
             clearInterval(this.timer);
 
-            // TODO: Show dialog
             this.setState({
                 millingProgress: -1,
                 selectedStepIndex: 0,
-                selectedStep: ipcRenderer.sendSync("Jobs::GetStep", 0)
+                selectedStep: ipcRenderer.sendSync("Jobs::GetStep", 0),
+				previousMillingStep: 0,
+				showAlert: true,
+				alertMessage: 'Emergency stop was pressed. Resetting job.'
             });
         }
 
@@ -155,14 +205,37 @@ class Milling extends React.Component {
             if (start) {
                 this.setState({
                     millingProgress: 0,
-                    showStartMilling: false
+                    showStartMilling: false,
+					previousMillingStep: this.state.selectedStepIndex
                 });
                 ipcRenderer.send("Jobs::StartMilling", this.state.selectedStepIndex);
-                this.timer = setInterval(this.progress, 200, this);
+                this.timer = setInterval(this.progress, 100, this);
             } else {
                 this.setState({ showStartMilling: false });
             }
         }
+
+		function isNextAvailable(component) {
+			return component.state.millingProgress == -1;
+		}
+
+		function isPrevAvailable(component) {
+			if (component.state.millingProgress == -1) {
+				if (component.state.selectedStepIndex == 0) {
+					return false;
+				}
+
+				if (component.state.selectedStepIndex - 1 > component.state.previousMillingStep) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		function isSkipAvailable(component) {
+			return component.state.selectedStep.next_milling_step != null;
+		}
 
         function getActionButton(component) {
             if (component.state.millingProgress == -1) {
@@ -193,35 +266,51 @@ class Milling extends React.Component {
         }
 
         return (
-            <section className={classes.millingStyle}>
-                <section className={classes.stepsList}>
-                    <Button style={{ marginTop: '5px' }} onClick={(event) => { this.setState({ goBack: true }) }}>
-                        <img
-                            style={{ height: '16px' }}
-                            src={path.join(__dirname, '../../static/img/back-to-main.png')}
-                        />
-                    </Button>
-                    <StepList steps={this.state.steps} selectedStep={this.state.selectedStepIndex} />
-                </section>
-                <section className={classes.middle}>
-                    <StartMilling open={this.state.showStartMilling} onClose={handleCloseStartMilling.bind(this)} />
-                    <div className={classes.instructions}>
-                        <Typography variant="subtitle1" style={{ textTransform: 'uppercase' }}><b> {this.state.selectedStep.Title} </b></Typography>
-                        <br />
-                        <Typography>{this.state.selectedStep.Prompt}</Typography>
-                    </div>
-                    <div className={classes.warning}>
-                        {getMillingInProgressDisplay(this)}
-                        {getWarning(this)}
-                    </div>
-                    <div className={classes.actions}>
-                        {getActionButton(this)}
-                    </div>
-                </section>
-                <section className={classes.right}>
-                    <ImageRaw selectedStep={this.state.selectedStep} />
-                </section>
-            </section>
+			<React.Fragment>
+				<Alert open={this.state.showAlert} message={this.state.alertMessage} close={(event) => { this.setState({ showAlert: false }) }} />
+
+				<section className={classes.millingStyle}>
+					<section className={classes.stepsList}>
+						<Button style={{ marginTop: '5px' }} onClick={(event) => { this.setState({ goBack: true }) }}>
+							<img
+								style={{ height: '16px' }}
+								src={path.join(__dirname, '../../static/img/back-to-main.png')}
+							/>
+						</Button>
+						<StepList steps={this.state.steps} selectedStep={this.state.selectedStepIndex} />
+						<Grid container spacing={0}>
+							<Grid item xs={4}>
+								<Button color="secondary" disabled={!isPrevAvailable(this)} className={classes.prev} onClick={handlePrev.bind(this)}>&#60; Prev</Button>
+							</Grid>
+							<Grid item xs={4}>
+								<center><Typography className={classes.stepNumber}>Step {this.state.selectedStepIndex + 1}/{this.state.steps.length}</Typography></center>
+							</Grid>
+							<Grid item xs={4}>
+								<Button color="secondary" disabled={!isNextAvailable(this)} className={classes.next} onClick={handleNext.bind(this)}>Next &#62;</Button>
+							</Grid>
+						</Grid>
+						<Button color="secondary" disabled={!isSkipAvailable(this)} className={classes.next} onClick={handleSkip.bind(this)}>Skip to Next Milling Step &#62;</Button>
+					</section>
+					<section className={classes.middle}>
+						<StartMilling open={this.state.showStartMilling} onClose={handleCloseStartMilling.bind(this)} />
+						<div className={classes.instructions}>
+							<Typography variant="subtitle1" style={{ textTransform: 'uppercase' }}><b> {this.state.selectedStep.Title} </b></Typography>
+							<br />
+							<Typography>{this.state.selectedStep.Prompt}</Typography>
+						</div>
+						<div className={classes.warning}>
+							{getMillingInProgressDisplay(this)}
+							{getWarning(this)}
+						</div>
+						<div className={classes.actions}>
+							{getActionButton(this)}
+						</div>
+					</section>
+					<section className={classes.right}>
+						<ImageRaw selectedStep={this.state.selectedStep} millingInProgress={this.state.millingProgress != -1} />
+					</section>
+				</section>
+			</React.Fragment>
         );
     }
 }

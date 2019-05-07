@@ -67,9 +67,8 @@ function ViewLogs(props) {
                 </center>    
             </DialogTitle>
             <DialogContent>
-                <Typography>Select job to continue.</Typography>
                 <br />
-                <textarea type="text" disabled={true} rows="12" cols="78" value={getLogText()} className={classes.logOutput} />
+                <textarea type="text" disabled={true} overflow="auto" rows="12" cols="78" value={getLogText()} className={classes.logOutput} />
                 <br />
             </DialogContent>
             <DialogActions>
@@ -92,7 +91,7 @@ function ViewLogs(props) {
                             onClick={handleOpen}
                             fullWidth
                         >
-                            OPEN/EDIT
+                            OPEN/SAVE
                         </Button>
                     </Grid>
                 </Grid>

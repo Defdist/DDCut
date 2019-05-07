@@ -1,5 +1,6 @@
 const DDCut = require('../../../Backend/ddcut.node');
 import { ipcMain, Event, dialog } from 'electron';
+import DDController from '../DDController';
 
 class JobsAPI {
     static Initialize() {
@@ -20,15 +21,25 @@ class JobsAPI {
         });
 
         ipcMain.on('Jobs::StartMilling', function (event: Event, stepIndex: number) {
+			JobsAPI.milling = true;
+			DDController.SetMillingStatus(true);
             DDCut.StartMilling(stepIndex);
         });
 
         ipcMain.on('Jobs::GetProgress', function (event: Event, stepIndex: number) {
-            event.returnValue = DDCut.GetMillingStatus(stepIndex);
+            event.sender.send('Jobs::ReadWrites', DDCut.GetReadWrites());
+			let status: number = DDCut.GetMillingStatus(stepIndex);
+			if (status == 100 || status < 0) {
+				DDController.SetMillingStatus(false);
+				JobsAPI.milling = false;
+			}
+
+            event.returnValue = status;
         });
 
         ipcMain.on('Jobs::EmergencyStop', function (event: Event, stepIndex: number) {
             event.returnValue = DDCut.EmergencyStop();
+			DDController.SetMillingStatus(false);
         });
     };
 }

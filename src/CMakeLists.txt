@@ -27,6 +27,7 @@ file(GLOB DDCUT_SRC
 	# "${CMAKE_CURRENT_SOURCE_DIR}/Common/*.cpp"
 	 "${CMAKE_CURRENT_SOURCE_DIR}/Files/*.cpp"
 	 "${CMAKE_CURRENT_SOURCE_DIR}/Ghost/*.cpp"
+	 "${CMAKE_CURRENT_SOURCE_DIR}/Ghost/Display/*.cpp"
      #"${CMAKE_CURRENT_SOURCE_DIR}/Logging/Logger.cpp"
 )
 

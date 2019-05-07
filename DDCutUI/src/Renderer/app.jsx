@@ -62,7 +62,8 @@ export default class App extends React.Component {
     constructor() {
         super();
         this.state = {
-            ghostGunnerStatus: 0
+            ghostGunnerStatus: 0,
+			millingInProgress: false
         };
     }
 
@@ -86,8 +87,19 @@ export default class App extends React.Component {
             }
         }
 
+        function updateMillingStatus(event, newStatus) {
+            if (newStatus != this.state.millingInProgress) {
+                this.setState({
+                    millingInProgress: newStatus
+                });
+            }
+        }
+
         ipcRenderer.removeAllListeners("DD_UpdateGGStatus");
         ipcRenderer.on("DD_UpdateGGStatus", updateStatus.bind(this));
+
+        ipcRenderer.removeAllListeners("Milling::Status");
+        ipcRenderer.on("Milling::Status", updateMillingStatus.bind(this));
 
         document.getElementsByClassName('window-appicon')[0].style.width = "20px";
         document.getElementsByClassName('window-appicon')[0].style.height = "20px";
@@ -98,7 +110,7 @@ export default class App extends React.Component {
             <React.Fragment>
                 <MuiThemeProvider theme={theme}>
                     <Routes status={this.state.ghostGunnerStatus} />
-                    <BottomToolbar status={this.state.ghostGunnerStatus} />
+                    <BottomToolbar status={this.state.ghostGunnerStatus} milling={this.state.millingInProgress} />
                 </MuiThemeProvider>
             </React.Fragment>
         );

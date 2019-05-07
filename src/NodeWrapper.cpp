@@ -159,11 +159,41 @@ napi_value GetAvailableGhostGunners(napi_env env, napi_callback_info info)
 		napi_set_named_property(env, ghostGunnerObj, "path", path);
 		ASSERT_STATUS(status)
 
+		napi_value currentlySelected;
+		status = napi_get_boolean(env, daemon.IsSelectedGhostGunner(ghostGunner), &currentlySelected);
+		ASSERT_STATUS(status)
+		napi_set_named_property(env, ghostGunnerObj, "selected", currentlySelected);
+		ASSERT_STATUS(status)
+
 		status = napi_set_element(env, ghostGunnersArray, i++, ghostGunnerObj);
 		ASSERT_STATUS(status)
 	}
 
 	return ghostGunnersArray;
+}
+
+napi_value SelectGhostGunner(napi_env env, napi_callback_info info)
+{
+	napi_status status;
+	napi_value result;
+
+	size_t argc = 2;
+	napi_value args[2];
+	status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+	ASSERT_STATUS(status)
+
+	std::string path;
+	NAPI_GET_STRING(env, args[0], path)
+
+	std::string serialNumber;
+	NAPI_GET_STRING(env, args[1], serialNumber)
+
+	const GhostGunner ghost(path, serialNumber);
+	const bool selected = DDCutDaemon::GetInstance().SetSelectedGhostGunner(ghost);
+	status = napi_get_boolean(env, selected, &result);
+	ASSERT_STATUS(status)
+
+	return result;
 }
 
 napi_value GetJobs(napi_env env, napi_callback_info info)
@@ -300,18 +330,44 @@ napi_value GetStep(napi_env env, napi_callback_info info)
 			{
 				const GCodeFile& gcodeFile = pOperation->GetGCodeFile();
 
-				std::string gcodeStr = "";
-				for (auto iter = gcodeFile.getLines().cbegin(); iter != gcodeFile.getLines().cend(); iter++)
-				{
-					gcodeStr += iter->GetOriginal();
-					gcodeStr += "<br/>"; // TODO: Return array instead, and have front-end add <br/> and step numbering.
-				}
+				napi_value gCodeArr;
+				status = napi_create_array_with_length(env, /*gcodeFile.getLines().size()*/ 0, &gCodeArr);
+				ASSERT_STATUS(status)
 
-				napi_value gcode;
-				status = napi_create_string_utf8(env, gcodeStr.c_str(), gcodeStr.size(), &gcode);
+				//for (size_t i = 0; i < gcodeFile.getLines().size(); i++)
+				//{
+				//	napi_value gCodeStr;
+				//	status = napi_create_string_utf8(env, gcodeFile.getLines()[i].GetOriginal().c_str(), gcodeFile.getLines()[i].GetOriginal().size(), &gCodeStr);
+				//	ASSERT_STATUS(status)
+
+				//	status = napi_set_element(env, gCodeArr, i, gCodeStr);
+				//	ASSERT_STATUS(status)
+				//}
+
+				status = napi_set_named_property(env, stepObj, "GCode", gCodeArr);
 				ASSERT_STATUS(status)
-				status = napi_set_named_property(env, stepObj, "GCode", gcode);
-				ASSERT_STATUS(status)
+			}
+			else
+			{
+				std::vector<Operation> steps = daemon.GetAllSteps();
+				for (size_t i = stepIndex + 1; i < steps.size(); i++)
+				{
+					Operation& step = steps[i];
+					if (step.Load())
+					{
+						if (!step.GetGCodeFile().getLines().empty())
+						{
+							napi_value nextMillingStep;
+							status = napi_create_uint32(env, i, &nextMillingStep);
+							ASSERT_STATUS(status)
+
+							status = napi_set_named_property(env, stepObj, "next_milling_step", nextMillingStep);
+							ASSERT_STATUS(status)
+
+							break;
+						}
+					}
+				}
 			}
 
 			if (pOperation->GetImage().size() > 0)
@@ -382,6 +438,42 @@ napi_value EmergencyStop(napi_env env, napi_callback_info info)
 	daemon.EmergencyStop();
 
 	return nullptr;
+}
+
+napi_value GetReadWrites(napi_env env, napi_callback_info info)
+{
+	napi_status status;
+
+	const std::vector<std::pair<ELineType, std::string>> readWrites = DDCutDaemon::GetInstance().GetReadWrites();
+
+	napi_value readWriteArr;
+	status = napi_create_array_with_length(env, readWrites.size(), &readWriteArr);
+	ASSERT_STATUS(status)
+
+	for (size_t i = 0; i < readWrites.size(); i++)
+	{
+		napi_value readWriteObj;
+		status = napi_create_object(env, &readWriteObj);
+		ASSERT_STATUS(status)
+
+		napi_value readWriteType;
+		const std::string lineType = readWrites[i].first == ELineType::READ ? "READ" : "WRITE";
+		status = napi_create_string_utf8(env, lineType.c_str(), lineType.size(), &readWriteType);
+		ASSERT_STATUS(status)
+		status = napi_set_named_property(env, readWriteObj, "TYPE", readWriteType);
+		ASSERT_STATUS(status)
+
+		napi_value readWriteString;
+		status = napi_create_string_utf8(env, readWrites[i].second.c_str(), readWrites[i].second.size(), &readWriteString);
+		ASSERT_STATUS(status)
+		status = napi_set_named_property(env, readWriteObj, "VALUE", readWriteString);
+		ASSERT_STATUS(status)
+
+		status = napi_set_element(env, readWriteArr, i, readWriteObj);
+		ASSERT_STATUS(status)
+	}
+
+	return readWriteArr;
 }
 
 napi_value GetSettings(napi_env env, napi_callback_info info)
@@ -1069,7 +1161,7 @@ napi_value Init(napi_env env, napi_value exports)
 	DDCutDaemon::GetInstance();
 
 	napi_status status;
-	napi_property_descriptor descriptors[33] = {
+	napi_property_descriptor descriptors[35] = {
 		DECLARE_NAPI_METHOD("Initialize", InitializeDaemon),
 		DECLARE_NAPI_METHOD("Shutdown", Shutdown),
 
@@ -1079,6 +1171,7 @@ napi_value Init(napi_env env, napi_value exports)
 
 		DECLARE_NAPI_METHOD("GetGhostGunnerStatus", GetGhostGunnerStatus),
 		DECLARE_NAPI_METHOD("GetAvailableGhostGunners", GetAvailableGhostGunners),
+		DECLARE_NAPI_METHOD("SelectGhostGunner", SelectGhostGunner),
 
 		DECLARE_NAPI_METHOD("GetFeedRate", GetFeedRate),
 		DECLARE_NAPI_METHOD("SetFeedRate", SetFeedRate),
@@ -1091,6 +1184,7 @@ napi_value Init(napi_env env, napi_value exports)
 		DECLARE_NAPI_METHOD("StartMilling", StartMilling),
 		DECLARE_NAPI_METHOD("GetMillingStatus", GetMillingStatus),
 		DECLARE_NAPI_METHOD("EmergencyStop", EmergencyStop),
+		DECLARE_NAPI_METHOD("GetReadWrites", GetReadWrites),
 
 		// Settings
 		DECLARE_NAPI_METHOD("GetEnableSlider", GetEnableSlider),
@@ -1122,7 +1216,7 @@ napi_value Init(napi_env env, napi_value exports)
 		DECLARE_NAPI_METHOD("GetLogPath", GetLogPath)
 	};
 
-	status = napi_define_properties(env, exports, 33, descriptors);
+	status = napi_define_properties(env, exports, 35, descriptors);
 	ASSERT_STATUS(status)
 	return exports;
 }

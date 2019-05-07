@@ -6,6 +6,7 @@
 #include "Files/job.h"
 #include "Ghost/FirmwareVersion.h"
 #include "Ghost/GhostGunner.h"
+#include "Ghost/Display/LineType.h"
 #include "Common/LockUtility.h"
 #include "MillingStatus.h"
 #include "RestClient/AvailableFirmware.h"
@@ -72,6 +73,9 @@ public:
 
 	// Sets the selected GhostGunner. Returns true if successful.
 	bool SetSelectedGhostGunner(const GhostGunner& ghostGunner);
+
+	// Determines if the given GhostGunner is the selected one.
+	bool IsSelectedGhostGunner(const GhostGunner& ghostGunner) const;
 
 
 
@@ -141,6 +145,8 @@ public:
 
 	// Gets the status of the milling for the given step. 0-100 indicates the percentage completed. -1 indicates a failure during upload.
 	MillingStatus GetMillingStatus(const int stepIndex) const;
+
+	std::vector<std::pair<ELineType, std::string>> GetReadWrites() const;
 
 	bool EmergencyStop() const;
 

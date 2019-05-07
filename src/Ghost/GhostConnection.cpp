@@ -7,6 +7,7 @@
 #include "M101.h"
 #include "DDLogger/DDLogger.h"
 #include "Common/LockUtility.h"
+#include "Display/GhostDisplayManager.h"
 
 #include <iostream>
 #include <sstream>
@@ -309,6 +310,7 @@ bool GhostConnection::ReadLine(std::string& buffer)
 		if (t == '\n')
 		{
 			m_readCache.push(m_readBuffer);
+			GhostDisplayManager::AddLine(ELineType::READ, m_readBuffer);
 
 			ProcessReadLine(m_readBuffer);
 			m_readBuffer = "";
@@ -524,6 +526,7 @@ bool GhostConnection::WriteCache()
 
         if (LockUtility::ObtainLock(m_ghSemaphore))
 		{
+			GhostDisplayManager::AddLine(ELineType::WRITE, output);
             if (!OSUtility::WriteToFile(m_file, output.c_str(), outputLength))
 			{
 				throw GhostException(GhostException::FAILED_WRITE);
@@ -744,6 +747,7 @@ void GhostConnection::EchoLine(const std::string& cleaned, const std::string& or
 void GhostConnection::WriteWithTimeout(const std::string& stringToWrite, const int timeout) const
 {
 	DDLogger::Log("GhostConnection::WriteWithTimeout() - Writing: " + stringToWrite);
+	GhostDisplayManager::AddLine(ELineType::WRITE, stringToWrite);
 	if (!OSUtility::WriteToFile(m_file, stringToWrite.c_str(), stringToWrite.length()))
 	{
 		throw GhostException(GhostException::FAILED_WRITE);

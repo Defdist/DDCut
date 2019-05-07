@@ -6,11 +6,11 @@ import { List, ListItem, ListItemText, Typography } from '@material-ui/core';
 const styles = theme => ({
     root: {
         width: '100%',
-        height: '100%',
+        height: 'calc(100% - 40px)',
     },
     list: {
         width: '100%',
-        height: 'calc(100% - 20px)',
+        height: '100%',
         overflow: 'auto',
         backgroundColor: '#9f9f9f',
         webkitAppearance: 'none',
@@ -33,12 +33,6 @@ const styles = theme => ({
         opacity: 0.87,
         fontSize: '14px',
         color: '#9f9f9f' /* selected: color: #069076;*/
-    },
-    stepNumber: {
-        marginTop: '10px',
-        opacity: 0.87,
-        fontSize: '14px',
-        color: '#9f9f9f'
     }
 });
 
@@ -47,51 +41,48 @@ class StepList extends React.Component {
         super();
         this.selectedRef = React.createRef();
     }
-
-    //isScrolledIntoView(el) {
-    //    var rect = el.getBoundingClientRect();
-    //    var elemTop = rect.top;
-    //    var elemBottom = rect.bottom;
-
-    //    // Only completely visible elements return true:
-    //    var isVisible = (elemTop >= 0) && (elemBottom <= window.innerHeight);
-    //    // Partially visible elements return true:
-    //    //isVisible = elemTop < window.innerHeight && elemBottom >= 0;
-    //    return isVisible;
-    //}
-
-    //handleScrollToElement(event) {
-    //    if (!isScrolledIntoView(this.selectedRef)) {
-    //        window.scrollTo(0, this.selectedRef.current.offsetTop);
-    //    }
-    //}
+    
+    componentWillReceiveProps(prevProps) {
+        setTimeout(() => {
+            this.selectedRef.scrollIntoView({ behavior: "smooth", block: 'center' });
+        });
+    }
 
     render() {
         const { classes, steps, selectedStep } = this.props;
+
+        function getListItem(step, index, component) {
+            var selectedDiv = null;
+            if (selectedStep === index) {
+                selectedDiv = (<div style={{ float: "left", clear: "both" }} ref={(el) => { component.selectedRef = el; }} />);
+            }
+
+            return (
+                <ListItem
+                    button
+                    disableGutters
+                    key={index}
+                    selected={selectedStep === index}
+                    className={classes.item}
+                >
+                    <ListItemText disableTypography>
+                        {selectedDiv}
+                        <Typography noWrap className={classes.itemText}>{step.Title}</Typography>
+                    </ListItemText>
+                </ListItem>
+            );
+        }
 
         return (
             <div className={classes.root}>
                 <List component="nav" className={classes.list}>
                     {
                         steps.map((step, index) => {
-                            return (
-                                <ListItem
-                                    button
-                                    disableGutters
-                                    key={index}
-                                    ref={selectedStep === index ? this.selectedRef : null}
-                                    selected={selectedStep === index}
-                                    className={classes.item}
-                                >
-                                    <ListItemText disableTypography>
-                                        <Typography noWrap className={classes.itemText}>{step.Title}</Typography>
-                                    </ListItemText>
-                                </ListItem>
-                            );
+                            return getListItem(step, index, this);
                         })
                     }
                 </List>
-                <Typography className={classes.stepNumber} align="right">Step {selectedStep + 1}/{steps.length}</Typography>
+                {/*<Typography className={classes.stepNumber} align="right">Step {selectedStep + 1}/{steps.length}</Typography>*/}
             </div>
         );
     }

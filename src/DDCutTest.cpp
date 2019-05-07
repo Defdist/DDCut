@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-int main(int argc, char* argv[])
+void TestMilling()
 {
 	DDCutDaemon& daemon = DDCutDaemon::GetInstance();
 	daemon.Initialize();
@@ -126,6 +126,23 @@ int main(int argc, char* argv[])
 	}
 
 	daemon.Shutdown();
+}
+
+int main(int argc, char* argv[])
+{
+	DDCutDaemon& daemon = DDCutDaemon::GetInstance();
+	daemon.Initialize();
+
+	std::unique_ptr<CustServiceReqError> pError = daemon.SendCustomerSupportRequest("Email", "", false);
+	if (pError != nullptr)
+	{
+		if (pError->ERRORS.empty())
+		{
+			return 0;
+		}
+	}
+
+	//TestMilling();
 
 	//daemon.GetAvailableFirmwareUpdates();
 

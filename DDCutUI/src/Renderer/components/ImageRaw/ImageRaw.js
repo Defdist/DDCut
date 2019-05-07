@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { ipcRenderer } from 'electron';
 import { withStyles } from '@material-ui/core/styles';
 import { Grid, Button, Typography } from '@material-ui/core';
 
@@ -22,14 +23,22 @@ class ImageRaw extends React.Component {
     constructor() {
         super();
         this.state = {
-            imageSelected: true
+            imageSelected: true,
+            readWrites: []
         };
+
+        this.gcodeEnd = null;
+        this.updateReadWrites = this.updateReadWrites.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
         if (this.props.selectedStep != nextProps.selectedStep) {
             return true;
         } else if (this.state.imageSelected != nextState.imageSelected) {
+            return true;
+        } else if (this.props.millingInProgress != nextProps.millingInProgress) {
+            return true;
+        } else if (this.state.readWrites != nextState.readWrites) {
             return true;
         }
 
@@ -38,14 +47,51 @@ class ImageRaw extends React.Component {
 
     componentDidUpdate(prevProps) {
         if (this.props.selectedStep !== prevProps.selectedStep) {
-            if (this.state.imageSelected != true) {
-                this.setState({ imageSelected: true });
-            }
+            this.setState({
+                imageSelected: true,
+                readWrites: []
+            });
+        }
+    }
+
+    updateReadWrites(event, newLines) {
+        if (newLines.length > 0) {
+            this.setState({
+                readWrites: [...this.state.readWrites, ...newLines]
+            });
         }
     }
 
     render() {
-        const { classes, selectedStep } = this.props;
+        const { classes, selectedStep, millingInProgress } = this.props;
+
+        ipcRenderer.removeAllListeners("Jobs::ReadWrites");
+        ipcRenderer.on("Jobs::ReadWrites", this.updateReadWrites);
+
+        function getGCodeDisplay(milling, readWrites) {
+            if (milling) {
+                return readWrites.map((readWrite, index) => {
+                    return (
+                        <Typography key={index} align="left" style={{ marginLeft: '10px' }}>
+                            {readWrite.TYPE} : {readWrite.VALUE}
+                        </Typography>
+                    )
+                });
+            } else {
+                var gcodes = [];
+                if (selectedStep.GCode != null) {
+                    gcodes = selectedStep.GCode;
+                }
+
+                return gcodes.map((gcode, index) => {
+                    return (
+                        <Typography key={index} align="left" style={{ marginLeft: '10px' }}>
+                            {gcode}
+                        </Typography>
+                    )
+                });
+            }
+        }
 
         function getDisplay(component) {
             if (component.state.imageSelected == true) {
@@ -53,20 +99,12 @@ class ImageRaw extends React.Component {
                     <img style={{ width: '100%', height: 'auto' }} src={'data:image/jpeg;base64,' + selectedStep.Image} />
                 );
             } else {
-                var gcodes = [];
-                if (selectedStep.GCode != null) {
-                    gcodes = selectedStep.GCode.split('<br/>');//selectedStep.GCode.replace(/<br\/>/g, "\r\n");
-                }
-
                 return (
                     <div className={classes.gcodes} >
-                        {gcodes.map((gcode, index) => {
-                            return (
-                                <Typography key={index} align="left" style={{ marginLeft: '10px' }}>
-                                    {gcode}
-                                </Typography>
-                            )
-                        })}
+                        {getGCodeDisplay(millingInProgress, component.state.readWrites)}
+                        <div style={{ float: "left", clear: "both" }}
+                            ref={(el) => { component.gcodeEnd = el; }}>
+                        </div>
                     </div>
                 );
             }
@@ -83,6 +121,12 @@ class ImageRaw extends React.Component {
                 this.setState({
                     imageSelected: false
                 });
+            }
+        }
+
+        function scrollToBottom(component) {
+            if (millingInProgress && component.gcodeEnd != null && !component.state.imageSelected) {
+                component.gcodeEnd.scrollIntoView({ behavior: "auto", block: 'center' });
             }
         }
 
@@ -120,6 +164,7 @@ class ImageRaw extends React.Component {
                 </Grid>
                 <br />
                 {getDisplay(this)}
+                {scrollToBottom(this)}
             </div>
         );
     }
@@ -127,7 +172,8 @@ class ImageRaw extends React.Component {
 
 ImageRaw.propTypes = {
     classes: PropTypes.object.isRequired,
-    selectedStep: PropTypes.object.isRequired
+    selectedStep: PropTypes.object.isRequired,
+    millingInProgress: PropTypes.bool.isRequired
 };
 
 export default withStyles(styles)(ImageRaw);

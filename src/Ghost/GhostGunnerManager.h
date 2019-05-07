@@ -16,6 +16,7 @@ public:
 	GhostConnection* GetConnection();
 	bool SetSelectedGhostGunner(const GhostGunner& ghostGunner);
 	void SetSelectedGhostGunner(GhostConnection* pGhostConnection);
+	bool IsSelectedGhostGunner(const GhostGunner& ghostGunner) const;
 
 	void ShutdownGhostGunner(Job* pJob, Operation* pOperation); // Shuts down the GhostGunner connection and makes sure to stop the spindle if it's running
 	bool ReadWriteCycle(Job* pJob, Operation* pOperation, const int hardLimitCount = 0); // ????

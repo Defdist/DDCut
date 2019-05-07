@@ -30,7 +30,7 @@
       },
       "electronPackagerConfig": {
         "packageManager": "npm",
-        "icon": "./src/Renderer/static/img/logo.ico"
+        "icon": "./src/Renderer/static/img/DD_icon.ico"
       },
       "electronWinstallerConfig": {
         "name": "ddcutui"
@@ -54,6 +54,7 @@
     "electron-compile": "^6.4.4",
     "electron-devtools-installer": "^2.2.4",
     "electron-squirrel-startup": "^1.0.0",
+    "fs": "0.0.1-security",
     "material-ui": "^0.20.2",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",

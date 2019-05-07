@@ -4,6 +4,7 @@
 #include "Settings/SettingManager.h"
 #include "Ghost/ConnectionInitializer.h"
 #include "Ghost/GhostGunnerManager.h"
+#include "Ghost/Display/GhostDisplayManager.h"
 #include "Ghost/GhostGunnerFinder.h"
 #include "Ghost/JobManager.h"
 #include "Ghost/GhostFirmwareManager.h"
@@ -87,7 +88,7 @@ void Thread_Connect(std::atomic_bool& shutdown, EGhostGunnerStatus& connectionSt
 			LockUtility::ReleaseLock(lockHandle);
 		}
 
-		Sleep(200);
+		Sleep(100);
 	}
 }
 
@@ -198,12 +199,22 @@ bool DDCutDaemon::SetSelectedGhostGunner(const GhostGunner& ghostGunner)
 
 	if (LockUtility::ObtainLock(m_lockHandle))
 	{
-		success = GhostGunnerManager::GetInstance().SetSelectedGhostGunner(ghostGunner);
-		m_connectionStatus = connecting;
+		if (!GhostGunnerManager::GetInstance().IsSelectedGhostGunner(ghostGunner))
+		{
+			GhostGunnerManager::GetInstance().ShutdownGhostGunner(nullptr, nullptr);
+			success = GhostGunnerManager::GetInstance().SetSelectedGhostGunner(ghostGunner);
+			m_connectionStatus = connecting;
+		}
+
 		LockUtility::ReleaseLock(m_lockHandle);
 	}
 
 	return success;
+}
+
+bool DDCutDaemon::IsSelectedGhostGunner(const GhostGunner& ghostGunner) const
+{
+	return GhostGunnerManager::GetInstance().IsSelectedGhostGunner(ghostGunner);
 }
 
 
@@ -460,6 +471,8 @@ void Thread_StartMilling(HANDLE lockHandle, Job& job, Operation& operation)
 {
 	ThreadManager::GetInstance().SetCurrentThreadName("MILLING_THREAD");
 	DDLogger::Log("MILLING THREAD - Start");
+
+	GhostDisplayManager::Clear();
 	if (LockUtility::ObtainLock(lockHandle))
 	{
 		GhostGunnerManager::GetInstance().ReadWriteCycle(&job, &operation);
@@ -531,6 +544,11 @@ MillingStatus DDCutDaemon::GetMillingStatus(const int stepIndex) const
 	{
 		return MillingStatus(completed, 100);
 	}
+}
+
+std::vector<std::pair<ELineType, std::string>> DDCutDaemon::GetReadWrites() const
+{
+	return GhostDisplayManager::GetLines();
 }
 
 bool DDCutDaemon::EmergencyStop() const

@@ -65,7 +65,7 @@ const styles = theme => ({
 });
 
 function Settings(props) {
-    const { classes } = props;
+    const { classes, disabled } = props;
     const [open, setOpen] = React.useState(false);
     const [pause, setPause] = React.useState(false);
     const [timeout, setTimeout] = React.useState(0);
@@ -75,16 +75,18 @@ function Settings(props) {
     const [grblVersion, setGrblVersion] = React.useState("");
 
     function handleClickOpen() {
-        setOpen(true);
-        var settings = ipcRenderer.sendSync("Settings::GetSettings");
-        setPause(settings.pauseAfterGCode);
-        setTimeout(settings.timeout);
-        setEnableSlider(settings.enable_slider);
-        setMaxFeedRate(settings.maxFeedRate);
+		if (!disabled) {
+			setOpen(true);
+			var settings = ipcRenderer.sendSync("Settings::GetSettings");
+			setPause(settings.pauseAfterGCode);
+			setTimeout(settings.timeout);
+			setEnableSlider(settings.enable_slider);
+			setMaxFeedRate(settings.maxFeedRate);
 
-        var firmware = ipcRenderer.sendSync("Firmware::GetFirmwareVersion");
-        setDDVersion(firmware.ddVersion);
-        setGrblVersion(firmware.grblVersion);
+			var firmware = ipcRenderer.sendSync("Firmware::GetFirmwareVersion");
+			setDDVersion(firmware.ddVersion);
+			setGrblVersion(firmware.grblVersion);
+		}
     }
 
     function handleClose() {
@@ -109,6 +111,7 @@ function Settings(props) {
             <Fab
                 variant="extended"
                 aria-label="Settings"
+				disabled={disabled}
                 onClick={handleClickOpen}
                 className={classes.settingsButton}
                 size="small"
@@ -227,7 +230,8 @@ function Settings(props) {
 }
 
 Settings.propTypes = {
-    classes: PropTypes.object.isRequired
+    classes: PropTypes.object.isRequired,
+    disabled: PropTypes.bool.isRequired
 };
 
 export default withStyles(styles)(Settings);

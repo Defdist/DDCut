@@ -5,6 +5,7 @@ import { AppBar, Button, Grid, Toolbar } from "@material-ui/core";
 import { shell } from "electron";
 import Status from '../Status';
 import Settings from '../Modals/Settings';
+import GhostChooser from '../Modals/GhostChooser';
 import Support from '../Support';
 
 const styles = theme => ({
@@ -26,7 +27,7 @@ const styles = theme => ({
 });
 
 function BottomToolbar(props) {
-    const { classes, status } = props;
+    const { classes, status, milling } = props;
 
     function openGhostGunnerNet() {
         shell.openExternal("https://ghostgunner.net/");
@@ -37,16 +38,17 @@ function BottomToolbar(props) {
             <AppBar position="fixed" className={classes.appBar}>
                 <Toolbar>
                     <Grid container spacing={0} className={classes.root} alignItems="center">
-                        <Grid item xs={3}>
+                        <Grid item xs={4}>
                             <Status status={status} />
+                            <GhostChooser disabled={milling} />
                         </Grid>
-                        <Grid item xs={9}>
+                        <Grid item xs={8}>
                             <div className={classes.right}>
                                 <Button color="secondary" onClick={openGhostGunnerNet}>
                                     Ghostgunner.net
                                 </Button>
-                                <Settings />
-                                <Support />
+                                <Settings disabled={milling} />
+                                <Support disabled={milling} />
                             </div>
                         </Grid>
                     </Grid>
@@ -58,7 +60,8 @@ function BottomToolbar(props) {
 
 BottomToolbar.propTypes = {
     classes: PropTypes.object.isRequired,
-    status: PropTypes.number.isRequired
+    status: PropTypes.number.isRequired,
+	milling: PropTypes.bool.isRequired
 };
 
 export default withStyles(styles)(BottomToolbar);
