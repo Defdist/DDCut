@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import path from "path";
-import { shell } from 'electron';
+import { shell, ipcRenderer } from 'electron';
 import {
     Fab, Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem
 } from "@material-ui/core";
@@ -102,6 +102,19 @@ class Support extends React.Component {
     render() {
         const { classes, disabled } = this.props;
 
+		function onClickWalkthrough(event) {
+			if (!disabled) {
+				const currentPage = ipcRenderer.sendSync("DD_GetCurrentPage");
+				if (currentPage == "Dashboard") {
+					window.ShowDashboardWalkthrough();
+				} else if (currentPage == "Milling") {
+					window.ShowMillingWalkthrough();
+				}
+			}
+
+			this.handleCloseMenu(event);
+		}
+
         function onClickViewManual(event) {
             shell.openExternal(__dirname + '/../../../../doc/GG2Manual.pdf');
             this.handleCloseMenu(event);
@@ -133,6 +146,7 @@ class Support extends React.Component {
                     className={classes.supportButton}
                     size="small"
                     buttonRef={node => { this.anchor = node }}
+					id="support"
                 >
                     <img src={path.join(__dirname, '../../static/img/support_button.png')} className={classes.supportImg} />
                 </Fab>
@@ -147,7 +161,7 @@ class Support extends React.Component {
                             <Paper className={classes.paper}>
                                 <ClickAwayListener onClickAway={this.handleCloseMenu}>
                                     <MenuList>
-                                        <MenuItem className={classes.menuItem} onClick={this.handleCloseMenu}>'How to' Walkthrough</MenuItem>
+                                        <MenuItem className={classes.menuItem} onClick={onClickWalkthrough.bind(this)}>'How to' Walkthrough</MenuItem>
                                         <MenuItem className={classes.menuItem} onClick={onClickViewManual.bind(this)}>View Manual</MenuItem>
                                         <MenuItem className={classes.menuItem} onClick={onClickVisitSupport.bind(this)}>Visit Support Page</MenuItem>
                                         <MenuItem className={classes.menuItem} onClick={onClickOpenDialog.bind(this)}>Customer Support Request</MenuItem>

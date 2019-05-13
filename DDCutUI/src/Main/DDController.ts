@@ -7,11 +7,13 @@ import GhostGunnerAPI from './API/GhostGunnerAPI';
 import JobsAPI from './API/JobsAPI';
 import LogsAPI from './API/LogsAPI';
 import SupportAPI from './API/SupportAPI';
+import WalkthroughAPI from './API/WalkthroughAPI';
 
 const globalAny: any = global;
 var mainWindow = null;
 
 var ggStatus = 0;
+var currentContainer : string = "Dashboard";
 
 function InitializeAPIs() {
     SettingsAPI.Initialize();
@@ -21,8 +23,16 @@ function InitializeAPIs() {
     JobsAPI.Initialize();
     LogsAPI.Initialize();
     SupportAPI.Initialize();
-};
+	WalkthroughAPI.Initialize();
+	
+    ipcMain.on("DD_SetCurrentPage", function (event: Event, container: string) {
+        currentContainer = container;
+    });
 
+	ipcMain.on("DD_GetCurrentPage", function (event: Event) {
+		event.returnValue = currentContainer;
+	});
+};
 
 function CheckConnectionStatus() {
     if (mainWindow != null) {

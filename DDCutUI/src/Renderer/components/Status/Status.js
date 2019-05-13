@@ -74,6 +74,7 @@ function Status(props) {
                     disabled={true}
                     align="left"
                     className={classes.status}
+					id="GGStatus"
                 >
                     <StatusIcon color={getColor()} style={{ width: "18px" }} />
                     <Typography color={getColor()}>

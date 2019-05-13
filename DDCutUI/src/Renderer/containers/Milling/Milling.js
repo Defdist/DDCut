@@ -94,6 +94,14 @@ class Milling extends React.Component {
         };
     }
 
+	componentDidMount() {
+		ipcRenderer.send('DD_SetCurrentPage', "Milling");
+		if (ipcRenderer.sendSync("Walkthrough::ShouldDisplay", "Milling")) {
+			window.ShowMillingWalkthrough();
+			ipcRenderer.send("Walkthrough::SetShowWalkthrough", "Milling", false);
+		}
+	}
+
     progress(milling) {
         const millingProgress = milling.state.millingProgress;
         if (millingProgress === 100) {
@@ -262,6 +270,7 @@ class Milling extends React.Component {
         }
 
         if (this.state.goBack == true) {
+			ipcRenderer.send('DD_SetCurrentPage', "Dashboard");
             return (<Redirect to='/' />);
         }
 
@@ -270,7 +279,7 @@ class Milling extends React.Component {
 				<Alert open={this.state.showAlert} message={this.state.alertMessage} close={(event) => { this.setState({ showAlert: false }) }} />
 
 				<section className={classes.millingStyle}>
-					<section className={classes.stepsList}>
+					<section id="steps" className={classes.stepsList}>
 						<Button style={{ marginTop: '5px' }} onClick={(event) => { this.setState({ goBack: true }) }}>
 							<img
 								style={{ height: '16px' }}
@@ -291,7 +300,7 @@ class Milling extends React.Component {
 						</Grid>
 						<Button color="secondary" disabled={!isSkipAvailable(this)} className={classes.next} onClick={handleSkip.bind(this)}>Skip to Next Milling Step &#62;</Button>
 					</section>
-					<section className={classes.middle}>
+					<section id="middle_section" className={classes.middle}>
 						<StartMilling open={this.state.showStartMilling} onClose={handleCloseStartMilling.bind(this)} />
 						<div className={classes.instructions}>
 							<Typography variant="subtitle1" style={{ textTransform: 'uppercase' }}><b> {this.state.selectedStep.Title} </b></Typography>
@@ -306,7 +315,7 @@ class Milling extends React.Component {
 							{getActionButton(this)}
 						</div>
 					</section>
-					<section className={classes.right}>
+					<section id="image" className={classes.right}>
 						<ImageRaw selectedStep={this.state.selectedStep} millingInProgress={this.state.millingProgress != -1} />
 					</section>
 				</section>

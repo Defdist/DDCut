@@ -4,6 +4,9 @@ import { ipcRenderer } from 'electron';
 import Routes from './Routes';
 import { Titlebar, Color } from 'custom-electron-titlebar';
 import BottomToolbar from './components/BottomToolbar';
+//import { Steps, Hints } from 'intro.js-react';
+
+//import 'intro.js/introjs.css';
 
 const theme = createMuiTheme({
     palette: {
@@ -78,7 +81,15 @@ export default class App extends React.Component {
         }
     }
 
+	componentDidMount() {
+		if (ipcRenderer.sendSync("Walkthrough::ShouldDisplay", "Dashboard")) {
+			window.ShowDashboardWalkthrough();
+			ipcRenderer.send("Walkthrough::SetShowWalkthrough", "Dashboard", false);
+		}
+	}
+
     render() {
+
         function updateStatus(event, newStatus) {
             if (newStatus != this.state.ghostGunnerStatus) {
                 this.setState({

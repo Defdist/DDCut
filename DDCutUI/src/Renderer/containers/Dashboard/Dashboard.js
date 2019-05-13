@@ -137,7 +137,7 @@ function Dashboard(props) {
                 >
                     <Grid item xs={4}>
                         <center>
-                            <Button style={{ backgroundColor: "transparent" }}>
+                            <Button style={{ backgroundColor: "transparent" }} id="store">
                                 <img
                                     style={{ marginTop: '20px', marginLeft: '30px', height: '14vh' }}
                                     src={path.join(__dirname, '../../static/img/store.png')}
@@ -150,7 +150,7 @@ function Dashboard(props) {
                     </Grid>
                     <Grid item xs={4}>
                         <center>
-                            <Button style={{ backgroundColor: "transparent" }} disabled={status != 2}>
+                            <Button style={{ backgroundColor: "transparent" }} disabled={status != 2} id="run">
                                 {getRunImage()}
                             </Button>
                         </center>

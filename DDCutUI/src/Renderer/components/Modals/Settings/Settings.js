@@ -115,6 +115,7 @@ function Settings(props) {
                 onClick={handleClickOpen}
                 className={classes.settingsButton}
                 size="small"
+				id="settings"
             >
                 <img src={path.join(__dirname, '../../../static/img/settings-cog.png')} className={classes.settingsCog} /> 
                 <img src={path.join(__dirname, '../../../static/img/settings.png')} className={classes.settingsText}/> 
