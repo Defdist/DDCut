@@ -1,0 +1,100 @@
+{
+    "name": "DDCut",
+    "productName": "DDCut",
+    "description": "DDCut",
+    "version": "2.10.0",
+    "private": true,
+    "author": "David Burkett",
+    "copyright": "© 2019, Defense Distributed",
+    "homepage": "http://defdist.com",
+    "main": "app/index.js",
+    "build": {
+        "appId": "DDCut",
+        "files": [
+            "app/**/*",
+            "node_modules/**/*",
+            "package.json"
+        ],
+        "directories": {
+            "buildResources": "resources"
+        },
+        "publish": [
+            {
+                "provider": "github",
+                "owner": "DefDist",
+                "repo": "DDCut"
+            }
+        ],
+        "nsis": {
+            "artifactName": "${productName} ${version} Setup.${ext}",
+            "oneClick": false,
+            "deleteAppDataOnUninstall": false,
+            "createDesktopShortcut": true,
+            "installerIcon": "./app/static/img/DD_icon.ico",
+            "uninstallerIcon": "./app/static/img/DD_icon.ico"
+        },
+        "win": {
+            "target": "nsis",
+            "icon": "./app/static/img/DD_icon.ico",
+            "publisherName": "Defense Distributed",
+            "verifyUpdateCodeSignature": false
+        },
+        "asar": false
+    },
+    "scripts": {
+        "dist:win32": "webpack --config=build/webpack.app.config.js --env=production && electron-builder -w --ia32 --config.nsis.artifactName=\"${productName} ${version} Setup x32.${ext}\"",
+        "publish:win32": "webpack --config=build/webpack.app.config.js --env=production && electron-builder -w --ia32 -p 'always' --config.nsis.artifactName=\"${productName} ${version} Setup x32.${ext}\"",
+        "postinstall": "electron-builder install-app-deps",
+        "preunit": "webpack --config=build/webpack.unit.config.js --env=test --display=none",
+        "unit": "electron-mocha temp/specs.js --renderer --require source-map-support/register",
+        "pree2e": "webpack --config=build/webpack.app.config.js --env=test --display=none && webpack --config=build/webpack.e2e.config.js --env=test --display=none",
+        "e2e": "mocha temp/e2e.js --require source-map-support/register",
+        "test": "npm run unit && npm run e2e",
+        "start": "node build/start.js",
+        "release": "webpack --config=build/webpack.app.config.js --env=production && electron-builder",
+        "tsc": "tsc src/Main/API/SettingsAPI.ts"
+    },
+    "dependencies": {
+        "@material-ui/core": "^4.0.2",
+        "@material-ui/icons": "^3.0.2",
+        "@material-ui/lab": "^4.0.0-alpha.15",
+        "custom-electron-titlebar": "^3.0.8",
+        "electron-log": "^3.0.5",
+        "electron-unhandled": "^2.2.0",
+        "electron-updater": "^4.0.6",
+        "fs": "0.0.1-security",
+        "fs-jetpack": "^2.1.0",
+        "intro.js": "^2.9.3",
+        "intro.js-react": "^0.2.0",
+        "react": "^16.8.6",
+        "react-dom": "^16.8.6",
+        "react-hot-loader": "^4.8.4",
+        "react-router-dom": "^5.0.0",
+        "ts-node": "^8.1.0",
+        "typescript": "^3.4.5"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.0.0-beta.54",
+        "@babel/preset-env": "^7.0.0-beta.54",
+        "@babel/preset-es2015": "^7.0.0-beta.53",
+        "@babel/preset-react": "^7.0.0",
+        "babel-loader": "^8.0.0-beta.4",
+        "babel-plugin-transform-object-rest-spread": "^7.0.0-beta.3",
+        "chai": "^4.1.0",
+        "css-loader": "^1.0.0",
+        "electron": "^5.0.4",
+        "electron-builder": "^20.15.1",
+        "electron-mocha": "^6.0.4",
+        "friendly-errors-webpack-plugin": "^1.7.0",
+        "mocha": "^5.2.0",
+        "native-ext-loader": "^2.3.0",
+        "node-loader": "^0.6.0",
+        "source-map-support": "^0.5.6",
+        "spectron": "^3.8.0",
+        "style-loader": "^0.21.0",
+        "webpack": "^4.12.0",
+        "webpack-cli": "^3.0.4",
+        "webpack-merge": "^4.1.3",
+        "webpack-node-externals": "^1.7.2"
+    }
+}

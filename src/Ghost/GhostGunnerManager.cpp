@@ -65,7 +65,7 @@ void GhostGunnerManager::ShutdownGhostGunner(Job* pJob, Operation* pOperation)
 	}
 }
 
-bool GhostGunnerManager::ReadWriteCycle(Job* pJob, Operation* pOperation, const int hardLimitCount)
+std::unique_ptr<GhostException>  GhostGunnerManager::ReadWriteCycle(Job* pJob, Operation* pOperation, const int hardLimitCount)
 {
 	// Uses pOperation, ps->filesize, ps->abortJob
 	try
@@ -106,6 +106,7 @@ bool GhostGunnerManager::ReadWriteCycle(Job* pJob, Operation* pOperation, const 
 			{
 				sleep = false;
 				DDLogger::Log("GhostGunnerManager::ReadWriteCycle - Line read: [" + s + "]");
+				s = "";
 			}
 
 			m_selectedGhostGunner->UpdateFeedRate();
@@ -124,7 +125,7 @@ bool GhostGunnerManager::ReadWriteCycle(Job* pJob, Operation* pOperation, const 
 		if (m_selectedGhostGunner->getState() & Ghost::Status::GS_TIMEOUT)
 		{
 			DDLogger::Log("GhostGunnerManager::ReadWriteCycle - Timeout exceeded.");
-			return false;
+			return std::make_unique<GhostException>(GhostException(GhostException::TIMEOUT));
 		}
 		else if (pJob != nullptr && pOperation->GetReset())
 		{
@@ -132,18 +133,19 @@ bool GhostGunnerManager::ReadWriteCycle(Job* pJob, Operation* pOperation, const 
 			m_selectedGhostGunner->reset();
 		}
 
-		return true;
+		return std::unique_ptr<GhostException>(nullptr);
 	}
 	catch (GhostException& e)
 	{
 		std::string exceptionMessage = e.what();
 		DDLogger::Log("GhostGunnerManager::ReadWriteCycle - Exception occured: " + exceptionMessage);
+		DDLogger::Flush();
 		if (e.getType() == GhostException::ALARM_LIMIT && (m_selectedGhostGunner->getState() & Ghost::Status::GS_HOMING))
 		{
 			// This mess deals with the case when someone has managed to get their machine stuck on a hard limit. It will try to unstick it 3 times.
 			if (hardLimitCount >= 3)
 			{
-				return false;
+				return std::make_unique<GhostException>(GhostException(e));
 			}
 			else
 			{
@@ -189,25 +191,25 @@ bool GhostGunnerManager::ReadWriteCycle(Job* pJob, Operation* pOperation, const 
 					}
 					else
 					{
-						return false;
+						return std::make_unique<GhostException>(GhostException(e));
 					}
 				}
-				catch (std::exception& e)
+				catch (...)
 				{
 					// Set soft limits
 					HardSend("$20=1");
-					return false;
+					return std::make_unique<GhostException>(GhostException(GhostException::GRBL_ERROR)); // TODO: Determine error
 				}
 			}
 		}
 		else
 		{
-			return false;
+			return std::make_unique<GhostException>(GhostException(e));
 		}
 	}
-	catch (std::exception& e)
+	catch (...)
 	{
-		return false;
+		return std::make_unique<GhostException>(GhostException(GhostException::GRBL_ERROR)); // TODO: Determine error
 	}
 }
 

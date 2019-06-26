@@ -3,9 +3,16 @@
 
 namespace DDLogger
 {
+	Logger* INSTANCE = nullptr;
+
 	DD_LOGGER_API bool Log(const std::string& eventText)
 	{
-		return Logger::GetInstance().Log(eventText);
+		if (INSTANCE == nullptr)
+		{
+			INSTANCE = new Logger();
+		}
+
+		return  INSTANCE->Log(eventText);
 	}
 
 	DD_LOGGER_API std::string GetLogPath()
@@ -15,11 +22,25 @@ namespace DDLogger
 
 	DD_LOGGER_API std::string ReadLog()
 	{
-		return Logger::GetInstance().ReadLog();
+		if (INSTANCE == nullptr)
+		{
+			INSTANCE = new Logger();
+		}
+
+		return INSTANCE->ReadLog();
 	}
 
 	DD_LOGGER_API void Flush()
 	{
-		Logger::GetInstance().Flush();
+		if (INSTANCE != nullptr)
+		{
+			INSTANCE->Flush();
+		}
+	}
+
+	DD_LOGGER_API void Shutdown()
+	{
+		delete INSTANCE;
+		INSTANCE = nullptr;
 	}
 }

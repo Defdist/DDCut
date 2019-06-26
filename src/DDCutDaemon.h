@@ -11,7 +11,6 @@
 #include "MillingStatus.h"
 #include "RestClient/AvailableFirmware.h"
 #include "RestClient/CustServiceReqError.h"
-#include "RestClient/SoftwareUpdateStatus.h"
 
 #include <list>
 #include <vector>
@@ -171,11 +170,6 @@ public:
 	std::unique_ptr<CustServiceReqError> SendCustomerSupportRequest(const std::string& email, const std::string& message, const bool includeLogs) const;
 
 	std::string GetLogPath() const;
-
-	// Checks to see if any updates are available. Returns true if there are.
-	std::unique_ptr<SoftwareUpdateStatus> CheckForUpdates() const;
-
-	bool InstallUpdates();
 
 private:
 	DDCutDaemon();

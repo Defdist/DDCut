@@ -128,11 +128,14 @@ bool GhostFirmwareManager::LoadFirmware(GhostConnection& connection, const std::
 
     // 10. Clear currently selected file
 	DDFileManager::GetInstance().SetSelectedFile(nullptr);
+
+	// 11. Clear cache
+	m_cachedFirmwareVersionsBySerialNumber.clear();
 #else
 	// TODO: Implement this for mac
 #endif
 
-	// 11. Reconnect
+	// 12. Reconnect
 	ConnectionInitializer().InitializeConnection(connection);
 
 	return true;

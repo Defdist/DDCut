@@ -6,12 +6,6 @@
 
 #include <fstream>
 
-Logger& Logger::GetInstance()
-{
-	static Logger instance;
-	return instance;
-}
-
 Logger::Logger()
 {
 	const bool success = FileUtility::MakeDirectory(OSUtility::GetExecPath(), "logs");
@@ -21,6 +15,11 @@ Logger::Logger()
 		m_logger = spdlog::create_async("LOGGER", sink, 8192, spdlog::async_overflow_policy::block_retry, nullptr, std::chrono::seconds(2));
 		m_logger->log(spdlog::level::level_enum::info, OSUtility::GetExecPath());
 	}
+}
+
+Logger::~Logger()
+{
+	spdlog::drop("LOGGER");
 }
 
 std::string Logger::GetLogPath()

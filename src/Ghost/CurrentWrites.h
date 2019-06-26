@@ -5,6 +5,11 @@
 class CurrentWrites
 {
 public:
+	inline unsigned long front()
+	{
+		return m_currentWrites.front();
+	}
+
 	inline unsigned long pop()
 	{
 		if (!m_currentWrites.empty())

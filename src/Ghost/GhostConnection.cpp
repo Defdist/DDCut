@@ -309,7 +309,6 @@ bool GhostConnection::ReadLine(std::string& buffer)
 
 		if (t == '\n')
 		{
-			m_readCache.push(m_readBuffer);
 			GhostDisplayManager::AddLine(ELineType::READ, m_readBuffer);
 
 			ProcessReadLine(m_readBuffer);
@@ -343,9 +342,14 @@ void GhostConnection::ProcessReadLine(const std::string& line)
 		if (m_currentWrites.total() > 0)
 		{
 			m_currentWrites.pop();
-
-			if (m_currentWrites.size() == 0)
+			if (m_state & GS_BLOCKING)
 			{
+				DDLogger::Log("GhostConnection::ProcessReadLine - m_currentWrites.size() = " + std::to_string(m_currentWrites.size()));
+			}
+
+			if (m_state & GS_BLOCKING && m_currentWrites.size() == 0)
+			{
+				DDLogger::Log("GhostConnection::ProcessReadLine - Unblocking");
 				m_state &= ~GS_BLOCKING;
 			}
 		}
@@ -454,6 +458,8 @@ void GhostConnection::flushReads() const
 
 bool GhostConnection::ReadSingleLine(std::string& line) const
 {
+	line = "";
+
 	char t;
 	while (OSUtility::ReadFromFile(m_file, &t, 1) > 0)
 	{
@@ -462,8 +468,10 @@ bool GhostConnection::ReadSingleLine(std::string& line) const
 			DDLogger::Log("GhostConnection::ReadSingleLine() - Line Read: " + line);
 			return true;
 		}
-
-		line.push_back(t);
+		else if (t != '\r')
+		{
+			line.push_back(t);
+		}
 	}
 
 	return false;
@@ -527,6 +535,7 @@ bool GhostConnection::WriteCache()
         if (LockUtility::ObtainLock(m_ghSemaphore))
 		{
 			GhostDisplayManager::AddLine(ELineType::WRITE, output);
+			DDLogger::Log("GhostConnection::WriteCache() - Writing: " + output);
             if (!OSUtility::WriteToFile(m_file, output.c_str(), outputLength))
 			{
 				throw GhostException(GhostException::FAILED_WRITE);
@@ -720,10 +729,10 @@ bool GhostConnection::WriteLine(std::string& output, const GCodeLine& line)
 	if (t0Length > 0)
 	{
 		output += t0 + "\n";
-		m_currentWrites.push(t0Length);
+		m_currentWrites.push(t0Length + 1);
 	}
 
-	EchoLine(t0, original);
+	//EchoLine(t0, original);
 
 	m_dqWriteBuffer.pop_front();
 	return true;

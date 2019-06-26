@@ -15,4 +15,5 @@ namespace DDLogger
 	DD_LOGGER_API std::string GetLogPath();
 	DD_LOGGER_API std::string ReadLog();
 	DD_LOGGER_API void Flush();
+	DD_LOGGER_API void Shutdown();
 }

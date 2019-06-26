@@ -7,7 +7,9 @@
 class Logger
 {
 public:
-	static Logger& GetInstance();
+	Logger();
+	~Logger();
+
 	static std::string GetLogPath();
 
 	bool Log(const std::string& eventText);
@@ -15,7 +17,6 @@ public:
 	void Flush();
 
 private:
-	Logger();
 
 	std::shared_ptr<spdlog::logger> m_logger;
 };

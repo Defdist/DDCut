@@ -1,7 +1,7 @@
 #include "RestClient.h"
 #include "AuthKey.h"
 
-static const std::string SERVER = "ddservices.twilightparadox.com";
+static const std::string SERVER = "ddservices.deathathletic.com";
 
 RestClient::RestClient(asio::ssl::stream<asio::ip::tcp::socket>& socket, asio::streambuf& request, asio::streambuf& response)
 	: m_socket(socket), m_request(request), m_response(response)
