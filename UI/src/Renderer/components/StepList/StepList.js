@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import { List, ListItem, ListItemText, Typography } from '@material-ui/core';
+import app from 'app';
 
 const styles = theme => ({
     root: {
@@ -12,7 +13,7 @@ const styles = theme => ({
         width: '100%',
         height: '100%',
         overflow: 'auto',
-        backgroundColor: '#9f9f9f',
+        backgroundColor: app.milling.steps.list.background,
         webkitAppearance: 'none',
         mozAppearance: 'none',
         appearance: 'none',
@@ -22,20 +23,20 @@ const styles = theme => ({
     item: {
         '&:hover': {
             height: '35px',
-            backgroundColor: 'black',
+            backgroundColor: app.milling.steps.items.background,
             border: '0px',
             marginLeft: '0px',
             marginRight: '0px',
         },
         '&:focus': {
             height: '35px',
-            backgroundColor: 'black',
+            backgroundColor: app.milling.steps.items.background,
             border: '0px',
             marginLeft: '0px',
             marginRight: '0px',
         },
         height: '35px',
-        backgroundColor: 'black',
+        backgroundColor: app.milling.steps.items.background,
         border: '0px',
         marginLeft: '0px',
         marginRight: '0px',
@@ -43,10 +44,9 @@ const styles = theme => ({
     itemText: {
         marginLeft: '0px',
         marginRight: '0px',
-        fontFamily: 'Arial',
         opacity: 0.87,
         fontSize: '14px',
-        color: '#ffffff' /* selected: color: #069076;*/
+        color: app.milling.steps.fontColor /* selected: color: #069076;*/
     }
 });
 
@@ -71,6 +71,11 @@ class StepList extends React.Component {
                 selectedDiv = (<div style={{ float: "left", clear: "both" }} ref={(el) => { component.selectedRef = el; }} />);
             }
 
+            var color = app.milling.steps.items.background;
+            if (selectedStep === index) {
+                color = app.milling.steps.items.selected;
+            }
+
             return (
                 <ListItem
                     button
@@ -78,6 +83,7 @@ class StepList extends React.Component {
                     key={index}
                     selected={selectedStep === index}
                     className={classes.item}
+                    style={{ backgroundColor: color }}
                 >
                     <ListItemText disableTypography>
                         {selectedDiv}

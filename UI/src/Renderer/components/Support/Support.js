@@ -8,6 +8,7 @@ import {
 import { withStyles } from "@material-ui/core/styles";
 import CustomerSupport from '../Modals/CustomerSupport';
 import ViewLogs from '../Modals/ViewLogs';
+import app from 'app';
 
 const styles = theme => ({
     root: {
@@ -21,6 +22,7 @@ const styles = theme => ({
         '&:hover': {
             backgroundColor: theme.palette.primary.dark
         },
+        color: '#ffffff'
     },
     supportButton: {
         paddingTop: 0,
@@ -114,21 +116,21 @@ class Support extends React.Component {
 		function onClickWalkthrough(event) {
 			const currentPage = ipcRenderer.sendSync("DD_GetCurrentPage");
 			if (currentPage == "Dashboard") {
-				window.ShowDashboardWalkthrough();
+				window.ShowDashboardWalkthrough(app.machine_name);
 			} else if (currentPage == "Milling") {
-				window.ShowMillingWalkthrough();
+				window.ShowMillingWalkthrough(app.machine_name);
 			}
 
 			this.handleCloseMenu(event);
 		}
 
         function onClickViewManual(event) {
-            shell.openExternal(path.join(__dirname, '/doc/GG2Manual.pdf'));
+            shell.openExternal(path.join(__dirname, app.support.manual));
             this.handleCloseMenu(event);
         }
 
         function onClickVisitSupport(event) {
-            shell.openExternal("https://ghostgunner.net/");
+            shell.openExternal(app.support.link);
             this.handleCloseMenu(event);
         }
 
@@ -138,7 +140,15 @@ class Support extends React.Component {
 
 		function onClickShowLogs() {
 			this.handleShowLogs();
-		}
+        }
+
+        function getManualMenu(_this) {
+            if (app.support.manual.length > 0) {
+                return(
+                    <MenuItem className={ classes.menuItem } onClick={ onClickViewManual.bind(_this) }>View Manual</MenuItem>
+                );
+            }
+        }
 
         return (
             <React.Fragment>
@@ -175,7 +185,7 @@ class Support extends React.Component {
                                 <ClickAwayListener onClickAway={this.handleCloseMenu}>
                                     <MenuList>
                                         <MenuItem className={classes.menuItem} onClick={onClickWalkthrough.bind(this)}>'How to' Walkthrough</MenuItem>
-                                        <MenuItem className={classes.menuItem} onClick={onClickViewManual.bind(this)}>View Manual</MenuItem>
+                                        {getManualMenu(this)}
                                         <MenuItem className={classes.menuItem} onClick={onClickVisitSupport.bind(this)}>Visit Support Page</MenuItem>
                                         <MenuItem className={classes.menuItem} onClick={onClickOpenDialog.bind(this)}>Customer Support Request</MenuItem>
                                         <MenuItem className={classes.menuItem} onClick={onClickShowLogs.bind(this)}>Show Logs</MenuItem>

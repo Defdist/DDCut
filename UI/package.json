@@ -1,8 +1,8 @@
 {
     "name": "DDCut",
     "productName": "DDCut",
-    "description": "DDCut",
-    "version": "2.10.0",
+    "description": "GG/AB Milling Software",
+    "version": "2.10.1",
     "private": true,
     "author": "David Burkett",
     "copyright": "© 2019, Defense Distributed",
@@ -13,7 +13,8 @@
         "files": [
             "app/**/*",
             "node_modules/**/*",
-            "package.json"
+            "package.json",
+            "!ghost.conf"
         ],
         "directories": {
             "buildResources": "resources"
@@ -42,16 +43,17 @@
         "asar": false
     },
     "scripts": {
-        "dist:win32": "webpack --config=build/webpack.app.config.js --env=production && electron-builder -w --ia32 --config.nsis.artifactName=\"${productName} ${version} Setup x32.${ext}\"",
-        "publish:win32": "webpack --config=build/webpack.app.config.js --env=production && electron-builder -w --ia32 -p 'always' --config.nsis.artifactName=\"${productName} ${version} Setup x32.${ext}\"",
+        "dist": "webpack --config=scripts/webpack.app.config.js --env=production --app=ddcut && electron-builder -w --ia32 --config.nsis.artifactName=\"DDCut ${version} Setup x32.${ext}\"",
+        "dist:ab": "webpack --config=scripts/webpack.ab.app.config.js --env=production --app=abcut && electron-builder -w --ia32 --config \"./scripts/abcut.yml\" --config.win.icon=\"./app/static/img/ABCut/ABLogo.ico\" --config.nsis.uninstallerIcon=\"./app/static/img/ABCut/ABLogo.ico\" --config.nsis.installerIcon=\"./app/static/img/ABCut/ABLogo.ico\"  --config.nsis.artifactName=\"ABCut ${version} Setup x32.${ext}\"",
+        "release": "webpack --config=scripts/webpack.app.config.js --env=production --app=ddcut && electron-builder -w --ia32 -p 'always' --config.nsis.artifactName=\"DDCut ${version} Setup x32.${ext}\"",
         "postinstall": "electron-builder install-app-deps",
-        "preunit": "webpack --config=build/webpack.unit.config.js --env=test --display=none",
+        "preunit": "webpack --config=scripts/webpack.unit.config.js --env=test --display=none",
         "unit": "electron-mocha temp/specs.js --renderer --require source-map-support/register",
-        "pree2e": "webpack --config=build/webpack.app.config.js --env=test --display=none && webpack --config=build/webpack.e2e.config.js --env=test --display=none",
+        "pree2e": "webpack --config=scripts/webpack.app.config.js --env=test --display=none && webpack --config=scripts/webpack.e2e.config.js --env=test --display=none",
         "e2e": "mocha temp/e2e.js --require source-map-support/register",
         "test": "npm run unit && npm run e2e",
-        "start": "node build/start.js",
-        "release": "webpack --config=build/webpack.app.config.js --env=production && electron-builder",
+        "start": "node scripts/start.js",
+        "startAB": "node scripts/start.js --app=abcut",
         "tsc": "tsc src/Main/API/SettingsAPI.ts"
     },
     "dependencies": {

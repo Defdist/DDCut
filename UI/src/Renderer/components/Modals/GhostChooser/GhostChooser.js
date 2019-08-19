@@ -5,6 +5,7 @@ import { ipcRenderer } from 'electron';
 import {
     Dialog, Typography, Button, Grid, DialogTitle, DialogContent, DialogActions
 } from '@material-ui/core';
+import app from 'app';
 
 const styles = theme => ({
     cancel: {
@@ -95,11 +96,11 @@ function GhostChooser(props) {
             >
                 <DialogTitle>
                     <center>
-                        Choose Ghost Gunner
+                        {app.chooser.title}
                     </center>
                 </DialogTitle>
                 <DialogContent>
-                    <Typography>Select a Ghost Gunner.</Typography>
+                    <Typography>{app.chooser.select}</Typography>
                     <select size="5" onChange={handleSelectGhost} className={classes.ghostList} value={selectedGhost}>
                         {getGhostOptions()}
                     </select>

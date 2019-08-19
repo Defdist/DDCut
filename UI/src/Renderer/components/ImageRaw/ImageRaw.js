@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { ipcRenderer } from 'electron';
 import { withStyles } from '@material-ui/core/styles';
 import { Grid, Button, Dialog, Typography } from '@material-ui/core';
+import app from 'app';
 
 const styles = theme => ({
     root: {
@@ -13,10 +14,10 @@ const styles = theme => ({
         width: '100%',
         height: 'calc(100% - 50px)',
         overflow: 'auto',
-        backgroundColor: 'black',
+        backgroundColor: app.milling.gcodes.background,
         position: 'relative',
-        border: '#FFFFFF 1px solid',
-        color: '#FFFFFF'
+        border: app.milling.gcodes.border,
+        color: app.milling.gcodes.color
     }
 });
 

@@ -7,6 +7,7 @@ import Status from '../Status';
 import Settings from '../Modals/Settings';
 import GhostChooser from '../Modals/GhostChooser';
 import Support from '../Support';
+import app from 'app';
 
 const styles = theme => ({
     root: {
@@ -30,7 +31,7 @@ function BottomToolbar(props) {
     const { classes, status, milling } = props;
 
     function openGhostGunnerNet() {
-        shell.openExternal("https://ghostgunner.net/");
+        shell.openExternal(app.toolbar.link.url);
     }
 
     return (
@@ -45,7 +46,7 @@ function BottomToolbar(props) {
                         <Grid item xs={8}>
                             <div className={classes.right}>
                                 <Button color="secondary" onClick={openGhostGunnerNet}>
-                                    GhostGunner.net
+                                    {app.toolbar.link.display}
                                 </Button>
                                 <Settings disabled={milling} />
                                 <Support disabled={milling} />

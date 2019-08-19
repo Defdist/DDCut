@@ -11,7 +11,7 @@ class FileAPI {
                 {
                     defaultPath: path.join(execPath, 'Cutting Code'),
                     properties: ['openFile', 'treatPackageAsDirectory'],
-                    filters: [{ name: "DD Files", extensions: ["dd"] }]
+                    filters: [{ name: "Milling Files", extensions: ["ab", "dd"] }]
                 },
                 function (files) {
                     if (files) {

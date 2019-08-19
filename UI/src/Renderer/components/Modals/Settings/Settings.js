@@ -9,6 +9,7 @@ import path from "path";
 import { withStyles } from "@material-ui/core/styles";
 import { ipcRenderer } from "electron";
 import FirmwareUpdater from "../FirmwareUpdater";
+import app from 'app';
 
 const styles = theme => ({
     settingsButton: {
@@ -40,7 +41,8 @@ const styles = theme => ({
         height: 30,
         marginLeft: theme.spacing.unit * 2,
         marginRight: theme.spacing.unit * 2,
-        marginTop: theme.spacing.unit
+        marginTop: theme.spacing.unit,
+        color: '#ffffff'
     },
     cancel: {
         marginRight: theme.spacing.unit
@@ -55,16 +57,17 @@ const styles = theme => ({
     },
     radioGroup: {
         width: "100%",
-        backgroundColor: "black",
+        backgroundColor: "transparent",
         borderStyle: "solid",
-        borderColor: "white",
+        borderColor: app.modal.color,
         borderWidth: "2px",
         borderRadius: "2px"
     },
     feedRatePercentage: {
         marginLeft: theme.spacing.unit,
         padding: theme.spacing.unit,
-        backgroundColor: "black"
+        backgroundColor: "transparent",
+        color: app.modal.color
     }
 });
 
@@ -165,7 +168,7 @@ function Settings(props) {
                     /><br /><br />
 
                     {/* Firmware */}
-                    <Typography color="textPrimary">Firmware Version: <b>{getVersionDisplay()}</b></Typography>
+                    <Typography>Firmware Version: <b>{getVersionDisplay()}</b></Typography>
                     <FirmwareUpdater refreshFirmwareVersion={() => { updateVersion() }} />
                     <br /><br />
 

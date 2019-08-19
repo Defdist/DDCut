@@ -4,12 +4,14 @@ import { ipcRenderer } from 'electron';
 import Routes from './Routes';
 import { Titlebar, Color } from 'custom-electron-titlebar';
 import BottomToolbar from './components/BottomToolbar';
-import {version} from '../../package.json';
+import { version } from '../../package.json';
+import app from 'app';
+
 
 const theme = createMuiTheme({
     palette: {
         secondary: {
-            main: "#069076",
+            main: app.colors.secondary,
         },
         primary: {
             main: '#ffffff',
@@ -17,8 +19,8 @@ const theme = createMuiTheme({
             dark: '#333333',
         },
         text: {
-            primary: "#ffffff",
-            secondary: "#cccccc",
+            primary: app.colors.textPrimary,
+            secondary: app.colors.textSecondary,
             disabled: "#444444"
         },
         background: {
@@ -28,13 +30,17 @@ const theme = createMuiTheme({
     typography: {
         useNextVariants: true,
         // Use the system font instead of the default Roboto font.
-        fontFamily: [
-            '"Lato"',
-            'sans-serif'
-        ].join(','),
-        body1: {
-            fontSize: 14
+        fontFamily: app.fonts.join(','),
+        root: {
+            fontWeight: app.font.weight
         },
+        body1: {
+            fontSize: 14,
+            fontWeight: app.font.weight
+        },
+        h6: {
+            fontWeight: app.font.weight
+        }
     },
     props: {
         MuiButtonBase: {
@@ -51,14 +57,36 @@ const theme = createMuiTheme({
     overrides: {
         MuiFormControl: {
             root: {
-                backgroundColor: '#555555',
+                backgroundColor: app.colors.form,
             },
         },
         MuiDialog: {
             paper: {
-                border: '#FFFFFF 1px solid' 
+                border: app.modal.border,
+                color: app.modal.color,
+                backgroundImage: `url(${app.modal.background})`
             }
-        }
+        },
+        MuiFab: {
+            root: {
+                fontFamily: app.fonts.join(','),
+                fontWeight: app.font.weight
+            }
+        },
+        MuiOutlinedInput: {
+            input: {
+                padding: '5px 10px'
+            }
+        },
+        MuiCssBaseline: {
+            '@global': {
+                '*::webkit-scrollbar': {
+                    width: '10px',
+                    backgroundColor: app.colors.scrollbar
+                },
+                '@font-weight': app.font.weight
+            },
+        },
     }
 });
 
@@ -73,10 +101,15 @@ export default class App extends React.Component {
 
     componentWillMount() {
         if (!this.props.data) {
-            document.title = 'DDCut v' + version;
+            if (app.name == 'ABCut') {
+                document.title = 'ABCut';
+            } else {
+                document.title = app.name + ' v' + version;
+            }
+
             let titlebar = new Titlebar({
                 backgroundColor: Color.fromHex('#333333'),
-                icon: './static/img/DD_icon.ico',
+                icon: app.titlebar.icon,
                 menu: null,
                 titleHorizontalAlignment: "left"
             });
@@ -85,7 +118,7 @@ export default class App extends React.Component {
 
 	componentDidMount() {
 		if (ipcRenderer.sendSync("Walkthrough::ShouldDisplay", "Dashboard")) {
-			window.ShowDashboardWalkthrough();
+			window.ShowDashboardWalkthrough(app.machine_name);
 			ipcRenderer.send("Walkthrough::SetShowWalkthrough", "Dashboard", false);
 		}
 	}

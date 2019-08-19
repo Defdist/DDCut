@@ -1,0 +1,83 @@
+{
+    "name": "ABCut",
+    "machine_name": "ABMill",
+    "fonts": [
+        "Rosario"
+    ],
+    "font": {
+        "weight": 800
+    },
+    "dialogs": {
+        "font": {
+            "weight": 800,
+            "color": "#ffffff"
+        }
+    },
+    "colors": {
+        "secondary": "#126e7a",
+        "textPrimary": "#000000",
+        "textSecondary": "#126e7a",
+        "scrollbar": "#aaaaaa",
+        "form": "#aaaaaa"
+    },
+    "dashboard": {
+        "background": "./static/img/ABCut/bg_with_mill.png",
+        "logo": "./static/img/ABCut/ablogo_black.png",
+        "buttons": "./static/img/ABCut/buttons/",
+        "border": "solid 3px #126e7a",
+        "store": {
+            "url": "https://abmill.net/collections"
+        },
+        "run": {
+            "tooltip": "Disabled until ABMill is connected"
+        }
+    },
+    "milling": {
+        "background": "./static/img/ABCut/bg_clean.png",
+        "steps": {
+            "list": {
+                "background": "transparent"
+            },
+            "items": {
+                "background": "transparent",
+                "selected": "#126e7a"
+            },
+            "fontColor": "#000000"
+        },
+        "gcodes": {
+            "background": "transparent",
+            "color": "#000000",
+            "border": "#aaaaaa 1px solid"
+        },
+        "step_number": "#222222",
+        "warning_text": "AB will move after pressing start",
+        "back_to_main": "./static/img/ABCut/back-to-main.png"
+    },
+    "titlebar": {
+        "icon": "./static/img/ABCut/ablogo_white.png"
+    },
+    "toolbar": {
+        "color": "#126e7a",
+        "link": {
+            "display": "ABMILL.NET",
+            "url": "https://abmill.net/"
+        },
+        "status": {
+            "label": "AB Status:"
+        }
+    },
+    "support": {
+        "link": "https://abmill.net/",
+        "manual": "/doc/Manual_ABMill.pdf"
+    },
+    "chooser": {
+        "title": "Choose ABMill",
+        "select": "Select an ABMill"
+    },
+    "modal": {
+        "background": "./static/img/ABCut/bg_clean.png",
+        "color": "#000000",
+        "border": "#000000 1px solid",
+        "backgroundColor": "#FFFFFF"
+    }
+}

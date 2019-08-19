@@ -85,7 +85,7 @@ std::string GhostErrorHandler::GetErrorMessage_Internal(GhostConnection& connect
 
 		const std::string msg = "The frame/lower is out of tolerance for the " 
 			+ exception.GetRawDetailMessage()// connection.GetError().substr(8, 1) 
-			+ " axis\n\nPlease adjust the frame/lower and try again.\n\nIf this error persists you may need to contact Ghost Gunner technical support or run the M100.DD file.\n\nThe workpiece is not positioned within tolerance for the " 
+			+ " axis\n\nPlease adjust the frame/lower and try again.\n\nIf this error persists you may need to contact Ghost Gunner technical support or run the M100 milling file.\n\nThe workpiece is not positioned within tolerance for the " 
 			+ exception.GetRawDetailMessage()// connection.GetError().substr(8, 1) 
 			+ " axis\n\n Please adjust the workpiece and try again.  ";
 		return msg;
@@ -172,7 +172,7 @@ void GhostErrorHandler::HandleFailure(GhostConnection& ghostConnection) const
 			//                    string msg = "M101 command failed with result: "+ ghostConnection.GetError().substr(8,1) +" axis.  Adjustment for Lower is out of tolerance and must be re-adjusted.\nDDCut will abort this job. ";
 			//string msg = "M101 command failed with result: The frame/lower is out of tolerance for the "+ ghostConnection.GetError().substr(8,1) +" axis\n\nPlease adjust the frame/lower and try again.\n\nIf this error persists you may need to contact Ghost Gunner technical support or run the M100.DD file.";
 
-			const std::string msg = "The frame/lower is out of tolerance for the " + ghostConnection.GetError().substr(8, 1) + " axis\n\nPlease adjust the frame/lower and try again.\n\nIf this error persists you may need to contact Ghost Gunner technical support or run the M100.DD file.\n\nThe workpiece is not positioned within tolerance for the " + ghostConnection.GetError().substr(8, 1) + " axis\n\n Please adjust the workpiece and try again.  ";
+			const std::string msg = "The frame/lower is out of tolerance for the " + ghostConnection.GetError().substr(8, 1) + " axis\n\nPlease adjust the frame/lower and try again.\n\nIf this error persists you may need to contact Ghost Gunner technical support or run the M100 milling file.\n\nThe workpiece is not positioned within tolerance for the " + ghostConnection.GetError().substr(8, 1) + " axis\n\n Please adjust the workpiece and try again.  ";
 			OSUtility::ShowMessageBox("Operation Aborted", msg);
 		}
 		else

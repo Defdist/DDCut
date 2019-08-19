@@ -9,6 +9,7 @@ import JobSelection from '../../components/Modals/JobSelection';
 import { Redirect } from 'react-router-dom';
 import CustomerSupport from '../../components/Modals/CustomerSupport';
 import Alert from '../../components/Modals/Alert';
+import app from 'app';
 
 const styles = theme => ({
     main: {
@@ -19,12 +20,12 @@ const styles = theme => ({
         marginLeft: 'auto',
         marginRight: 'auto',
         position: 'absolute',
-        borderLeft: 'solid 3px #969696',
-        borderRight: 'solid 3px #969696',
-        borderBottom: 'solid 3px #969696',
+        borderLeft: app.dashboard.border,
+        borderRight: app.dashboard.border,
+        borderBottom: app.dashboard.border,
     },
     dashboardStyle: {
-        backgroundImage: `url(${"./static/img/back-texture.jpg"})`,
+        backgroundImage: `url(${app.dashboard.background})`,
         backgroundSize: 'cover',
         overflow: 'hidden',
         width: '100%',
@@ -46,7 +47,7 @@ const styles = theme => ({
         marginBottom: 'auto',
         marginLeft: 'calc(-20% - 30px)',
         position: 'absolute',
-        borderTop: 'solid 3px #969696',
+        borderTop: app.dashboard.border,
     },
     topRight: {
         width: 'calc(40% - 60px)',
@@ -55,7 +56,7 @@ const styles = theme => ({
         marginBottom: 'auto',
         marginLeft: 'calc(20% + 30px)',
         position: 'absolute',
-        borderTop: 'solid 3px #969696',
+        borderTop: app.dashboard.border,
     },
     runButton: {
         '&:disabled': {
@@ -111,9 +112,9 @@ function Dashboard(props) {
             return (
                 <img
                     style={{ marginTop: '20px', height: '14vh' }}
-                    src={path.join(__dirname, './static/img/run.png')}
-                    onMouseOver={e => e.currentTarget.src = path.join(__dirname, './static/img/run_hover.png')}
-                    onMouseOut={e => e.currentTarget.src = path.join(__dirname, './static/img/run.png')}
+                    src={path.join(__dirname, app.dashboard.buttons + 'run.png')}
+                    onMouseOver={e => e.currentTarget.src = path.join(__dirname, app.dashboard.buttons + 'run_hover.png')}
+                    onMouseOut={e => e.currentTarget.src = path.join(__dirname, app.dashboard.buttons + 'run.png')}
                     onClick={onClickRun}
                 />
             );
@@ -121,7 +122,7 @@ function Dashboard(props) {
             return (
                 <img
                     style={{ marginTop: '20px', height: '14vh' }}
-                    src={path.join(__dirname, './static/img/run.png')}
+                    src={path.join(__dirname, app.dashboard.buttons + 'run.png')}
                 />
             );
         }
@@ -133,7 +134,7 @@ function Dashboard(props) {
                 <Tooltip
                     disableFocusListener={true}
                     disableTouchListener={true}
-                    title="Disabled until GhostGunner is connected"
+                    title={app.dashboard.run.tooltip}
                 >
                     <span>
                         <Button className={classes.runButton} style={{ backgroundColor: "transparent" }} disabled={true} id="run">
@@ -163,7 +164,7 @@ function Dashboard(props) {
             <div className={classes.main}>
                 <div style={{ position: "absolute", width: "100%" }}>
                     <center>
-                        <img src={path.join(__dirname, './static/img/logo-white.png')} width="88px" style={{ marginTop: "-44px" }} />
+                        <img src={path.join(__dirname, app.dashboard.logo)} width="88px" style={{ marginTop: "-44px" }} />
                     </center>
                 </div>
                 <Grid container
@@ -178,10 +179,10 @@ function Dashboard(props) {
                             <Button style={{ backgroundColor: "transparent" }} id="store">
                                 <img
                                     style={{ marginTop: '20px', marginLeft: '30px', height: '14vh' }}
-                                    src={path.join(__dirname, './static/img/store.png')}
-                                    onMouseOver={e => e.currentTarget.src = path.join(__dirname, './static/img/store_hover.png')}
-                                    onMouseOut={e => e.currentTarget.src = path.join(__dirname, './static/img/store.png')}
-                                    onClick={() => { shell.openExternal("https://ghostgunner.net/collections/featured-products") }}
+                                    src={path.join(__dirname, app.dashboard.buttons + 'store.png')}
+                                    onMouseOver={e => e.currentTarget.src = path.join(__dirname, app.dashboard.buttons + 'store_hover.png')}
+                                    onMouseOut={e => e.currentTarget.src = path.join(__dirname, app.dashboard.buttons + 'store.png')}
+                                    onClick={() => { shell.openExternal(app.dashboard.store.url) }}
                                 />
                             </Button>
                         </center>
@@ -196,9 +197,9 @@ function Dashboard(props) {
                             <Button style={{ backgroundColor: "transparent" }}>
                                 <img
                                     style={{ marginTop: '20px', marginRight: '30px', height: '14vh' }}
-                                    src={path.join(__dirname, './static/img/help.png')}
-                                    onMouseOver={e => e.currentTarget.src = path.join(__dirname, './static/img/help_hover.png')}
-                                    onMouseOut={e => e.currentTarget.src = path.join(__dirname, './static/img/help.png')}
+                                    src={path.join(__dirname, app.dashboard.buttons + 'help.png')}
+                                    onMouseOver={e => e.currentTarget.src = path.join(__dirname, app.dashboard.buttons + 'help_hover.png')}
+                                    onMouseOut={e => e.currentTarget.src = path.join(__dirname, app.dashboard.buttons + 'help.png')}
                                     onClick={onClickHelp}
                                 />
                             </Button>

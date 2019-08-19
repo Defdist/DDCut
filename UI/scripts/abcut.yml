@@ -1,0 +1,44 @@
+productName: "ABCut"
+appId: "ABCut"
+
+# Package electron code into a asar archive. Set to false to debug issues.
+asar: false
+
+# Mac OS configuration
+mac:
+  icon: "src/app/assets/images/icon.icns"
+
+# Windows configuration
+win:
+  icon: "app/static/img/DD_icon.ico"
+  target:
+    - "nsis"
+
+# Config for the windows installer
+nsis:
+  oneClick: false
+
+# Linux configuration
+linux:
+  category: Development
+  target:
+    - "AppImage"
+    - "deb"
+    - "rpm"
+
+deb:
+  depends:
+    # --- Default START
+    - gconf2
+    - gconf-service
+    - libnotify4
+    - libappindicator1
+    - libxtst6
+    - libnss3
+    # --- Default END
+    - libsecret-1-0 # This is needed for keytar on linux
+
+
+publish:
+  provider: "generic"
+  url: "https://batchlabsdist.blob.core.windows.net/releases"

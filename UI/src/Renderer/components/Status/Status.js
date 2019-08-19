@@ -3,10 +3,10 @@ import PropTypes from "prop-types";
 import {
     MuiThemeProvider, createMuiTheme, Fab, Typography
 } from "@material-ui/core";
-import { ipcRenderer } from "electron";
 import { withStyles } from "@material-ui/core/styles";
-import { green, red, yellow } from "@material-ui/core/colors";
+import { red, yellow } from "@material-ui/core/colors";
 import StatusIcon from "@material-ui/icons/lens";
+import app from 'app';
 
 const styles = theme => ({
     leftRightPadding: {
@@ -14,28 +14,18 @@ const styles = theme => ({
     },
     status: {
         marginLeft: 0,
-        //marginBottom: theme.spacing.unit,
         paddingLeft: 0,
-        //paddingBottom: 2 * theme.spacing.unit,
     }
 });
 
 function Status(props) {
     const { classes, status } = props;
-    //const [ghostGunnerStatus, setGhostGunnerStatus] = React.useState(0);
-
-    /*ipcRenderer.removeAllListeners("DD_UpdateGGStatus");
-    ipcRenderer.on("DD_UpdateGGStatus", function (event, newStatus) {
-        if (newStatus != ghostGunnerStatus) {
-            setGhostGunnerStatus(newStatus);
-        }
-    });*/
 
 
     const statusTheme = createMuiTheme({
         palette: {
             primary: {
-                main: '#069076',
+                main: app.colors.secondary,
             },
             secondary: yellow,
             error: red
@@ -86,7 +76,7 @@ function Status(props) {
                     <Typography variant="body1" color={getColor()}>
                         <b>
                             <span className={classes.leftRightPadding} style={{ color: '#ffffff' }}>
-                                GG Status:
+                                {app.toolbar.status.label}
                             </span>
                             {getStatusText()}
                         </b>

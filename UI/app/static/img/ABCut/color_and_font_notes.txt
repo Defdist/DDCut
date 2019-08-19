@@ -1,0 +1,4 @@
+Dark Blue: #19252b
+Light Blue (Menus): #1b94a4
+Light Blue (Outside of menus): #126e7a
+Font Family: Rosario

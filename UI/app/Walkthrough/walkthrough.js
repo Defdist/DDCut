@@ -2,7 +2,7 @@
 //////////////////////////////////////////////////////
 // Dashboard
 //////////////////////////////////////////////////////
-function ShowDashboardWalkthrough() {
+function ShowDashboardWalkthrough(machine_name) {
     var intro = introJs();
     intro.setOptions({
         showStepNumbers: false,
@@ -17,24 +17,24 @@ function ShowDashboardWalkthrough() {
         showBullets: false,
         steps: [
             {
-                intro: "WELCOME TO THE GHOST GUNNER DASHBOARD INTERFACE!"
+                intro: `WELCOME TO THE ${machine_name.toUpperCase()} DASHBOARD INTERFACE!`
             },
             {
                 element: '#run',
-                intro: "Click RUN to select and run a DD file on your Ghost Gunner."
+                intro: `Click RUN to select and run a milling file on your ${machine_name}.'`
             },
             {
                 element: '#store',
-                intro: 'Purchase new jigs, lowers and tooling from the Ghost Gunner Store.',
+                intro: `Purchase new jigs, lowers and tooling from the ${machine_name} Store.`,
                 position: 'top'
             },
             {
                 element: '#GGStatus',
-                intro: 'The status bar displays Ghost Gunner status.'
+                intro: `The status bar displays ${machine_name} status.`
             },
             {
                 element: '#settings',
-                intro: "Access settings and update firmware.",
+                intro: 'Access settings and update firmware.',
                 position: 'top'
             },
             {
@@ -52,7 +52,7 @@ function ShowDashboardWalkthrough() {
 //////////////////////////////////////////////////////
 // Milling
 //////////////////////////////////////////////////////
-function ShowMillingWalkthrough() {
+function ShowMillingWalkthrough(machine_name) {
     var intro = introJs();
     intro.setOptions({
         showStepNumbers: false,
@@ -67,11 +67,11 @@ function ShowMillingWalkthrough() {
         showBullets: false,
         steps: [
             {
-                intro: "WELCOME TO YOUR GHOST GUNNER OPERATION SCREEN!"
+                intro: `WELCOME TO YOUR ${machine_name.toUpperCase()} OPERATION SCREEN!`
             },
             {
                 element: '#steps',
-                intro: "This displays the DD file and all the steps in the file.",
+                intro: "This displays the milling file and all the steps in the file.",
                 position: 'right'
             },
             {

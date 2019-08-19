@@ -4,7 +4,7 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import { ipcRenderer } from 'electron';
 import {
     Dialog, Typography, Button, Grid, DialogTitle, DialogContent, DialogActions, Select,
-    DialogContentText, FormControl, FormLabel, FormControlLabel, Checkbox, TextField
+    DialogContentText, FormControlLabel, Checkbox, TextField
 } from '@material-ui/core';
 
 const styles = theme => ({

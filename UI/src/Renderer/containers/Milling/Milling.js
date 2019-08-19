@@ -8,12 +8,13 @@ import Feedrate from '../../components/Feedrate';
 import StartMilling from '../../components/Modals/StartMilling';
 import Alert from '../../components/Modals/Alert';
 import path from "path";
-import { Button, IconButton, Typography, LinearProgress, Grid } from '@material-ui/core';
+import { Button, Fab, IconButton, Typography, LinearProgress, Grid } from '@material-ui/core';
 import { Redirect } from 'react-router-dom';
+import app from 'app';
 
 const styles = theme => ({
     millingStyle: {
-        backgroundImage: `url(${"./static/img/milling-background.jpg"})`,
+        backgroundImage: `url(${app.milling.background})`,
         backgroundSize: 'cover',
         overflow: 'hidden',
         width: '100%',
@@ -81,7 +82,7 @@ const styles = theme => ({
         marginTop: '6px',
         opacity: 0.87,
         fontSize: '14px',
-        color: '#9f9f9f'
+        color: app.milling.step_number
     }
 });
 
@@ -105,7 +106,7 @@ class Milling extends React.Component {
 	componentDidMount() {
 		ipcRenderer.send('DD_SetCurrentPage', "Milling");
 		if (ipcRenderer.sendSync("Walkthrough::ShouldDisplay", "Milling")) {
-			window.ShowMillingWalkthrough();
+			window.ShowMillingWalkthrough(app.machine_name);
 			ipcRenderer.send("Walkthrough::SetShowWalkthrough", "Milling", false);
 		}
 	}
@@ -178,8 +179,8 @@ class Milling extends React.Component {
                     return (
                         <Typography align='center' color='error'>
                             Warning!<br />
-                            GG will move after pressing start
-                    </Typography>
+                            {app.milling.warning_text}
+                        </Typography>
                     );
                 }
             }
@@ -279,25 +280,51 @@ class Milling extends React.Component {
 
         function getActionButton(component) {
             if (component.state.millingProgress == -1) {
-                return (
-                    <IconButton onClick={handleNext.bind(component)}>
-                        <img
-                            style={{ height: '90px' }}
-                            onMouseOver={e => e.currentTarget.src = path.join(__dirname, './static/img/next_hover.png')}
-                            onMouseOut={e => e.currentTarget.src = path.join(__dirname, './static/img/next.png')}
-                            src={path.join(__dirname, './static/img/next.png')}
-                        />
-                    </IconButton>
-                );
+                if (app.name == 'DDCut') {
+                    return (
+                        <IconButton onClick={handleNext.bind(component)}>
+                            <img
+                                style={{ height: '90px' }}
+                                onMouseOver={e => e.currentTarget.src = path.join(__dirname, './static/img/next_hover.png')}
+                                onMouseOut={e => e.currentTarget.src = path.join(__dirname, './static/img/next.png')}
+                                src={path.join(__dirname, './static/img/next.png')}
+                            />
+                        </IconButton>
+                    );
+                } else {
+                    return (
+                        <Button
+                            onClick={handleNext.bind(component)}
+                            variant="contained"
+                            color='secondary'
+                            style={{ marginTop: '15px', width: '125px', height: '60px', fontSize: '22px' }}
+                        >
+                            Next
+                        </Button>
+                    );
+                }
             } else {
-                return (
-                    <IconButton onClick={handleStop.bind(component)}>
-                        <img
-                            style={{ height: '80px' }}
-                            src={path.join(__dirname, './static/img/stop_circle.png')}
-                        />
-                    </IconButton>
-                );
+                if (app.name == 'DDCut') {
+                    return (
+                        <IconButton onClick={handleStop.bind(component)}>
+                            <img
+                                style={{ height: '80px' }}
+                                src={path.join(__dirname, './static/img/stop_circle.png')}
+                            />
+                        </IconButton>
+                    );
+                } else {
+                    return (
+                        <Button
+                            onClick={handleStop.bind(component)}
+                            variant="contained"
+                            color='error'
+                            style={{ marginTop: '15px', width: '125px', height: '60px', fontSize: '22px', backgroundColor: 'red', color: 'white' }}
+                        >
+                            Stop
+                    </Button>
+                    );
+                }
             }
         }
 
@@ -340,7 +367,7 @@ class Milling extends React.Component {
                         <Button style={{ marginTop: '5px' }} onClick={(event) => { onClickBack(this) }}>
 							<img
 								style={{ height: '16px' }}
-								src={path.join(__dirname, './static/img/back-to-main.png')}
+								src={path.join(__dirname, app.milling.back_to_main)}
 							/>
 						</Button>
 						<StepList steps={this.state.steps} selectedStep={this.state.selectedStepIndex} />
@@ -355,7 +382,7 @@ class Milling extends React.Component {
 								<Button color="secondary" disabled={!isNextAvailable(this)} className={classes.next} onClick={handleNext.bind(this)}>Next &#62;</Button>
 							</Grid>
 						</Grid>
-						<Button color="secondary" disabled={!isSkipAvailable(this)} className={classes.next} onClick={handleSkip.bind(this)}>Skip to Next Milling Step &#62;</Button>
+                        <Button color="secondary" disabled={!isSkipAvailable(this)} className={classes.next} style={{ marginTop: '-4px' }} onClick={handleSkip.bind(this)}>Skip to Next Milling Step &#62;</Button>
 					</section>
 					<section id="middle_section" className={classes.middle}>
 						<StartMilling open={this.state.showStartMilling} onClose={handleCloseStartMilling.bind(this)} />

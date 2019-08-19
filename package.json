@@ -10,7 +10,7 @@
     "electron-log": "^3.0.5",
     "electron-titlebar": "0.0.3",
     "intro.js": "^2.9.3",
-    "npm": "^6.1.0"
+    "npm": "^6.10.1"
   },
   "scripts": {
     "configure": "mkdir build && cd build && mkdir win32 && cd win32 && cmake ../../src",

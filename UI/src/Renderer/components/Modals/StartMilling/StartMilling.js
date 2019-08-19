@@ -33,7 +33,7 @@ function StartMilling(props) {
                 </center>
             </DialogTitle>
             <DialogContent>
-                <Typography color="textPrimary" align="center">The machine is about to start moving. Are you sure you<br />want to continue?</Typography>
+                <Typography align="center">The machine is about to start moving. Are you sure you<br />want to continue?</Typography>
             </DialogContent>
             <DialogActions>
                 <Grid container spacing={8} justify="center">
