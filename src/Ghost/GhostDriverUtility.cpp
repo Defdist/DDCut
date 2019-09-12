@@ -1,6 +1,6 @@
 #include "GhostDriverUtility.h"
 
-#include "Logging/Logger.h"
+#include "DDLogger/DDLogger.h"
 #include "Common/OSUtility.h"
 
 #include <vector>
@@ -34,7 +34,7 @@ bool GhostDriverUtility::IsArduinoDriverInstalled() const
 		if (hdevinfo == INVALID_HANDLE_VALUE)
 		{
 			DWORD err = GetLastError();
-			Logger::GetInstance().Log("GhostDriverUtility::IsArduinoDriverInstalled() - Not Found: " + std::to_string(err));
+			DDLogger::Log("GhostDriverUtility::IsArduinoDriverInstalled() - Not Found: " + std::to_string(err));
 		}
 		else
 		{
@@ -61,7 +61,7 @@ bool GhostDriverUtility::IsArduinoDriverInstalled() const
 		if (!SetupDiGetDeviceInstanceId(hdevinfo, &devinfo, instance_id, _countof(instance_id), NULL))
 		{
 			DWORD err = GetLastError();
-			Logger::GetInstance().Log("GhostDriverUtility::IsArduinoDriverInstalled() - SetupDiGetDeviceInstanceId: " + std::to_string(err));
+			DDLogger::Log("GhostDriverUtility::IsArduinoDriverInstalled() - SetupDiGetDeviceInstanceId: " + std::to_string(err));
 		}
 		else
 		{
@@ -110,7 +110,7 @@ bool GhostDriverUtility::InstallHardwareDriver() const
 
 	// 2. Determine arduino directory
 	std::string newDir = OSUtility::GetExecPath() + "\\Drivers\\Arduino";
-	Logger::GetInstance().Log("GhostDriverUtility::InstallHardwareDriver - Arduino directory: " + newDir);
+	DDLogger::Log("GhostDriverUtility::InstallHardwareDriver - Arduino directory: " + newDir);
 
 	// 3. Build command
 	const std::string command = sysdir + "\\cmd.EXE /C install.bat";
@@ -118,11 +118,11 @@ bool GhostDriverUtility::InstallHardwareDriver() const
 	// 4. Execute command in new process
 	if (!OSUtility::ExecuteCommandInNewProcess(command, newDir))
 	{
-		Logger::GetInstance().Log("GhostDriverUtility::InstallHardwareDriver - Failure: " + std::to_string(GetLastError()));
+		DDLogger::Log("GhostDriverUtility::InstallHardwareDriver - Failure: " + std::to_string(GetLastError()));
 		return false;
 	}
 
-	Logger::GetInstance().Log("GhostDriverUtility::InstallHardwareDriver - Success");
+	DDLogger::Log("GhostDriverUtility::InstallHardwareDriver - Success");
 
 	MessageBox(NULL, "The Ardiuno Device Driver was loaded; Please unplug GhostGunner from USB and plug it back in to activate the port.", "Information", MB_ICONINFORMATION | MB_OK);
 #endif

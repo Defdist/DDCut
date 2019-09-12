@@ -5,7 +5,7 @@
 #include "ProbeHelper.h"
 
 #include <Settings/SettingManager.h>
-#include <Logging/Logger.h>
+#include <DDLogger/DDLogger.h>
 
 GhostGunnerManager& GhostGunnerManager::GetInstance()
 {
@@ -22,7 +22,7 @@ bool GhostGunnerManager::SetSelectedGhostGunner(const GhostGunner& ghostGunner)
 {
 	delete m_selectedGhostGunner;
 
-	Logger::GetInstance().Log("GhostGunnerManager::SetSelectedGhostGunner() - Path: " + ghostGunner.GetPath() + " Serial Number: " + ghostGunner.GetSerialNumber());
+	DDLogger::Log("GhostGunnerManager::SetSelectedGhostGunner() - Path: " + ghostGunner.GetPath() + " Serial Number: " + ghostGunner.GetSerialNumber());
 	m_selectedGhostGunner = new GhostConnection(ghostGunner);
 	return true;
 }
@@ -31,6 +31,16 @@ void GhostGunnerManager::SetSelectedGhostGunner(GhostConnection* pGhostConnectio
 {
 	delete m_selectedGhostGunner;
 	m_selectedGhostGunner = pGhostConnection;
+}
+
+bool GhostGunnerManager::IsSelectedGhostGunner(const GhostGunner& ghostGunner) const
+{
+	if (m_selectedGhostGunner != nullptr)
+	{
+		return m_selectedGhostGunner->GetGhostGunner() == ghostGunner;
+	}
+
+	return false;
 }
 
 void GhostGunnerManager::ShutdownGhostGunner(Job* pJob, Operation* pOperation)
@@ -55,34 +65,32 @@ void GhostGunnerManager::ShutdownGhostGunner(Job* pJob, Operation* pOperation)
 	}
 }
 
-bool GhostGunnerManager::ReadWriteCycle(Job* pJob, Operation* pOperation, const int hardLimitCount)
+std::unique_ptr<GhostException>  GhostGunnerManager::ReadWriteCycle(Job* pJob, Operation* pOperation, const int hardLimitCount)
 {
 	// Uses pOperation, ps->filesize, ps->abortJob
 	try
 	{
-		bool hit, cleanup = true;
-		std::string s;
-
 		if (pOperation != nullptr && pOperation->GetTimeout() > 0)
 		{
-			Logger::GetInstance().Log("GhostGunnerManager::ReadWriteCycle - Using operation timeout: " + std::to_string(pOperation->GetTimeout()));
+			DDLogger::Log("GhostGunnerManager::ReadWriteCycle - Using operation timeout: " + std::to_string(pOperation->GetTimeout()));
 			m_selectedGhostGunner->setTimeout(std::chrono::seconds(pOperation->GetTimeout()));
 		}
 		else
 		{
-			Logger::GetInstance().Log("GhostGunnerManager::ReadWriteCycle - Using global timeout: " + std::to_string(SettingManager::GetInstance().GetTimeout()));
+			DDLogger::Log("GhostGunnerManager::ReadWriteCycle - Using global timeout: " + std::to_string(SettingManager::GetInstance().GetTimeout()));
 			m_selectedGhostGunner->setTimeout(std::chrono::seconds(SettingManager::GetInstance().GetTimeout()));
 		}
 
 		m_selectedGhostGunner->ResetIdleTime();
 
+		bool cleanup = true;
 		while (true)
 		{
 			if (!m_selectedGhostGunner->WriteCache())
 			{
 				if (cleanup && !(m_selectedGhostGunner->getState() & Ghost::Status::GS_LOCKED))
 				{
-					Logger::GetInstance().Log("GhostGunnerManager::ReadWriteCycle - Cleaning up. Sending G4 P0.1");
+					DDLogger::Log("GhostGunnerManager::ReadWriteCycle - Cleaning up. Sending G4 P0.1");
 					m_selectedGhostGunner->send("G4 P0.1"); // Wait for 0.1 seconds (http://linuxcnc.org/docs/html/gcode/g-code.html#gcode:g4)
 					cleanup = false;
 				}
@@ -92,16 +100,18 @@ bool GhostGunnerManager::ReadWriteCycle(Job* pJob, Operation* pOperation, const 
 				}
 			}
 
-			hit = false;
+			bool sleep = true;
+			std::string s;
 			while (m_selectedGhostGunner->ReadLine(s))
 			{
-				hit = true;
-				Logger::GetInstance().Log("GhostGunnerManager::ReadWriteCycle - Line read: [" + s + "]");
+				sleep = false;
+				DDLogger::Log("GhostGunnerManager::ReadWriteCycle - Line read: [" + s + "]");
+				s = "";
 			}
 
 			m_selectedGhostGunner->UpdateFeedRate();
 
-			if (!hit)
+			if (sleep)
 			{
 				Sleep(10);
 			}
@@ -114,45 +124,42 @@ bool GhostGunnerManager::ReadWriteCycle(Job* pJob, Operation* pOperation, const 
 
 		if (m_selectedGhostGunner->getState() & Ghost::Status::GS_TIMEOUT)
 		{
-			Logger::GetInstance().Log("GhostGunnerManager::ReadWriteCycle - Timeout exceeded.");
-			return false;
+			DDLogger::Log("GhostGunnerManager::ReadWriteCycle - Timeout exceeded.");
+			return std::make_unique<GhostException>(GhostException(GhostException::TIMEOUT));
 		}
-		else
+		else if (pJob != nullptr && pOperation->GetReset())
 		{
-			if (pJob != nullptr && pOperation->GetReset())
-			{
-				Logger::GetInstance().Log("GhostGunnerManager::ReadWriteCycle - Calling reset().");
-				m_selectedGhostGunner->reset();
-			}
-
-			return true;
+			DDLogger::Log("GhostGunnerManager::ReadWriteCycle - Calling reset().");
+			m_selectedGhostGunner->reset();
 		}
 
+		return std::unique_ptr<GhostException>(nullptr);
 	}
 	catch (GhostException& e)
 	{
 		std::string exceptionMessage = e.what();
-		Logger::GetInstance().Log("GhostGunnerManager::ReadWriteCycle - Exception occured: " + exceptionMessage);
+		DDLogger::Log("GhostGunnerManager::ReadWriteCycle - Exception occured: " + exceptionMessage);
+		DDLogger::Flush();
 		if (e.getType() == GhostException::ALARM_LIMIT && (m_selectedGhostGunner->getState() & Ghost::Status::GS_HOMING))
 		{
 			// This mess deals with the case when someone has managed to get their machine stuck on a hard limit. It will try to unstick it 3 times.
 			if (hardLimitCount >= 3)
 			{
-				return false;
+				return std::make_unique<GhostException>(GhostException(e));
 			}
 			else
 			{
-				Logger::GetInstance().Log("Attempting to unstick from hard limits and rerunning operation");
+				DDLogger::Log("Attempting to unstick from hard limits and rerunning operation");
 				try
 				{
-					Logger::GetInstance().Log("Unsetting soft limits");
+					DDLogger::Log("Unsetting soft limits");
 					Sleep(1000);
 					HardSend("$20=0");
 
-					Logger::GetInstance().Log("Reconnecting");
+					DDLogger::Log("Reconnecting");
 					m_selectedGhostGunner->reconnect();
 
-					Logger::GetInstance().Log("Reconnected, unsticking");
+					DDLogger::Log("Reconnected, unsticking");
 					m_selectedGhostGunner->send("$X");
 					m_selectedGhostGunner->send("G91");
 					m_selectedGhostGunner->send("G1 X1 Y-1 Z-1 F10");
@@ -168,41 +175,41 @@ bool GhostGunnerManager::ReadWriteCycle(Job* pJob, Operation* pOperation, const 
 				}
 				catch (GhostException& e)
 				{
-					Logger::GetInstance().Log("Setting soft limits");
+					DDLogger::Log("Setting soft limits");
 					Sleep(1000);
 					HardSend("$20=1");
 
 					if (e.getType() == GhostException::ALARM_LIMIT)
 					{
-						Logger::GetInstance().Log("Reconnecting");
+						DDLogger::Log("Reconnecting");
 						m_selectedGhostGunner->reconnect();
 
 
-						Logger::GetInstance().Log("Reconnected, resending operation");
+						DDLogger::Log("Reconnected, resending operation");
 						m_selectedGhostGunner->send(pOperation->GetGCodeFile());
 						return ReadWriteCycle(pJob, pOperation, hardLimitCount + 1);
 					}
 					else
 					{
-						return false;
+						return std::make_unique<GhostException>(GhostException(e));
 					}
 				}
-				catch (std::exception& e)
+				catch (...)
 				{
 					// Set soft limits
 					HardSend("$20=1");
-					return false;
+					return std::make_unique<GhostException>(GhostException(GhostException::GRBL_ERROR)); // TODO: Determine error
 				}
 			}
 		}
 		else
 		{
-			return false;
+			return std::make_unique<GhostException>(GhostException(e));
 		}
 	}
-	catch (std::exception& e)
+	catch (...)
 	{
-		return false;
+		return std::make_unique<GhostException>(GhostException(GhostException::GRBL_ERROR)); // TODO: Determine error
 	}
 }
 

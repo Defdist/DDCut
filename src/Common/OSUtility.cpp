@@ -1,8 +1,7 @@
 #include "OSUtility.h"
 #include "FileUtility.h"
 
-#include <Ghost/GhostException.h>
-#include <Logging/Logger.h>
+#include <DDLogger/DDLogger.h>
 
 #include <filesystem>
 #ifdef _WIN32
@@ -56,22 +55,24 @@ std::string OSUtility::GetExecPath()
 #endif
 }
 
-void OSUtility::WriteToFile(const OS_FILE file, const char* pc, const int num)
+bool OSUtility::WriteToFile(const OS_FILE file, const char* pc, const int num)
 {
 #ifdef _WIN32
 	DWORD writeSize;
 	WriteFile(file, pc, num, &writeSize, NULL);
 	if (num != writeSize)
 	{
-		throw GhostException(GhostException::FAILED_WRITE);
+		return false;
 	}
 #else
 	int writeSize = write(file, pc, num);
 	if (num != writeSize)
-	{ 
-		throw GhostException(GhostException::FAILED_WRITE);
+	{
+		return false;
 	}
 #endif
+
+	return true;
 }
 
 int OSUtility::ReadFromFile(const OS_FILE file, char* pc, const int num)
@@ -110,10 +111,16 @@ bool OSUtility::ExecuteCommandInNewProcess(const std::string& directory, const s
     ZeroMemory(&pi, sizeof(pi));
     
     // 4. Create the process
-    Logger::GetInstance().Log("OSUtility::ExecuteCommandInNewProcess - Command: " + command);
+    DDLogger::Log("OSUtility::ExecuteCommandInNewProcess - Command: " + command);
     if (!CreateProcess(NULL, (LPSTR)command.c_str(), NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi))
     {
-        Logger::GetInstance().Log("OSUtility::ExecuteCommandInNewProcess - CreateProcess failed : " + std::to_string(GetLastError()));
+		wchar_t buf[256];
+		FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			buf, (sizeof(buf) / sizeof(wchar_t)), NULL);
+		std::wstring lastError(buf);
+		std::string lastErrorStr(lastError.begin(), lastError.end());
+        DDLogger::Log("OSUtility::ExecuteCommandInNewProcess - CreateProcess failed : " + lastErrorStr);
         FileUtility::SetWorkingDirectory(oldDirectory);
         return false;
     }

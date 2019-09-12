@@ -1,7 +1,7 @@
 #include "GhostException.h"
 
 GhostException::GhostException(const EGhostException t)
-	: m_type(t)
+	: GhostException(t, "")
 {
 
 }
@@ -66,12 +66,17 @@ std::string GhostException::GetTypeMessage() const
 	}
 }
 
+std::string GhostException::GetRawDetailMessage() const
+{
+	return m_errorDetail;
+}
+
 const char* GhostException::what() const noexcept
 {
 	return m_combinedMessage.c_str();
 }
 
-GhostException::EGhostException GhostException::getType()
+GhostException::EGhostException GhostException::getType() const
 {
 	return m_type;
 }

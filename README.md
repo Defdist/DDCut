@@ -1,6 +1,6 @@
-# DDCut2
+# DDCut
 
-DDCut2 is easy-to-use, cross-platform software provided by Defense Distributed for use with their Ghost Gunner CNC mill. For more information, visit the Ghost Gunner website (https://ghostgunner.net) or read the Ghost Gunner 2 operator's manual (https://cdn.shopify.com/s/files/1/0206/7642/files/GG2_Manual_2017.pdf?16884723091915665092).
+DDCut is easy-to-use, cross-platform software provided by Defense Distributed for use with their Ghost Gunner CNC mill. For more information, visit the Ghost Gunner website (https://ghostgunner.net) or read the Ghost Gunner 2 operator's manual (https://cdn.shopify.com/s/files/1/0206/7642/files/GG2_Manual_2017.pdf?16884723091915665092).
 
 ## Build
 For instructions on how to compile and build the code, see docs/BUILD.md.

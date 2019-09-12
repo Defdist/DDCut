@@ -1,0 +1,84 @@
+{
+    "name": "DDCut",
+    "machine_name": "Ghost Gunner",
+    "fonts": [
+        "\"Lato\"",
+        "sans-serif"
+    ],
+    "font": {
+        "weight": 500
+    },
+    "dialogs": {
+        "font": {
+            "weight": 500,
+            "color": "#000000"
+        }
+    },
+    "colors": {
+        "secondary": "#069076",
+        "textPrimary": "#ffffff",
+        "textSecondary": "#cccccc",
+        "scrollbar": "#000000",
+        "form": "#555555"
+    },
+    "dashboard": {
+        "background": "./static/img/back-texture.jpg",
+        "logo": "./static/img/logo-white.png",
+        "buttons": "./static/img/DDCut/buttons/",
+        "border": "solid 3px #969696",
+        "store": {
+            "url": "https://ghostgunner.net/collections/featured-products"
+        },
+        "run": {
+            "tooltip": "Disabled until GhostGunner is connected"
+        }
+    },
+    "milling": {
+        "background": "./static/img/milling-background.jpg",
+        "steps": {
+            "list": {
+                "background": "#9f9f9f"
+            },
+            "items": {
+                "background": "black",
+                "selected": "#069076"
+            },
+            "fontColor": "#ffffff"
+        },
+        "gcodes": {
+            "background": "#000000",
+            "color": "#ffffff",
+            "border": "#FFFFFF 1px solid"
+        },
+        "step_number": "#9f9f9f",
+        "warning_text": "GG will move after pressing start",
+        "back_to_main": "./static/img/back-to-main.png"
+    },
+    "titlebar": {
+        "icon": "./static/img/DD_icon.ico"
+    },
+    "toolbar": {
+        "color": "#069076",
+        "link": {
+            "display": "GhostGunner.net",
+            "url": "https://ghostgunner.net/"
+        },
+        "status": {
+            "label": "DD Status:"
+        }
+    },
+    "support": {
+        "link": "https://ghostgunner.net/",
+        "manual": "/doc/GG2Manual.pdf"
+    },
+    "chooser": {
+        "title": "Choose Ghost Gunner",
+        "select": "Select a Ghost Gunner"
+    },
+    "modal": {
+        "background": "",
+        "color": "#FFFFFF",
+        "border": "#FFFFFF 1px solid",
+        "backgroundColor": "#000000"
+    }
+}

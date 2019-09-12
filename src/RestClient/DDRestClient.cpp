@@ -42,38 +42,6 @@ std::unique_ptr<CustServiceReqError> DDRestClient::SendCustomerServiceRequest(co
 	}
 }
 
-std::unique_ptr<SoftwareUpdateStatus> DDRestClient::CheckForSoftwareUpdates(const std::string& ddcutVersion)
-{
-	SoftwareUpdateStatus status;
-
-#ifdef _WIN32
-	const std::string operatingSystem = "Windows";
-#else
-	const std::string operatingSystem = "OSX";
-#endif
-
-	RestResponse response = RestClient::Get("/updateGGSoftware/?currentVersion=" + ddcutVersion + "&operatingSystem=" + operatingSystem);
-
-	Json::Value rootNode;
-	if (ParseResponse(response, rootNode))
-	{
-		status.LATEST_VERSION = rootNode["latestVersion"].asString();
-		status.RELEASE_NOTES = rootNode["releaseNotes"].asString();
-		status.ADDED_FILES = ParseFiles(rootNode["addedFiles"]);
-		status.CHANGED_FILES = ParseFiles(rootNode["changedFiles"]);
-
-		Json::Value deletedNode = rootNode["deleted_files"];
-		const size_t size = deletedNode.size();
-		for (size_t i = 0; i < size; i++)
-		{
-			Json::Value file = deletedNode.get(Json::ArrayIndex(i), "");
-			status.DELETED_FILES.emplace_back(file["relativePath"].asString());
-		}
-	}
-
-	return std::make_unique<SoftwareUpdateStatus>(status);
-}
-
 std::vector<AvailableFirmware> DDRestClient::CheckForFirmwareUpdates(const std::string& ddcutVersion, const std::string& firmwareVersion)
 {
 	std::vector<AvailableFirmware> updatesAvailable;
@@ -123,23 +91,4 @@ bool DDRestClient::ParseResponse(const RestResponse& response, Json::Value& root
 	}
 
 	return false;
-}
-
-std::vector<UpdateFile> DDRestClient::ParseFiles(const Json::Value& filesNode)
-{
-	std::vector<UpdateFile> files;
-
-	const size_t size = filesNode.size();
-	for (size_t i = 0; i < size; i++)
-	{
-		const Json::Value file = filesNode.get(Json::ArrayIndex(i), "");
-
-		UpdateFile updateFile;
-		updateFile.PATH = file["relativePath"].asString();
-		updateFile.URL = file["s3url"].asString();
-
-		files.emplace_back(std::move(updateFile));
-	}
-
-	return files;
 }

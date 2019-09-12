@@ -1,12 +1,12 @@
 #ifdef _WIN32
 #include "GhostConnection.h"
-#include "Logging/Logger.h"
+#include "DDLogger/DDLogger.h"
 
 #include <windows.h>
 
 void GhostConnection::connectOS()
 {
-	Logger::GetInstance().Log("GhostConnection::connectOS() - WIN32 - File Path: " + m_ghostGunner.GetPath());
+	DDLogger::Log("GhostConnection::connectOS() - WIN32 - File Path: " + m_ghostGunner.GetPath());
 	m_file = CreateFile(m_ghostGunner.GetPath().c_str(), GENERIC_READ|GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
 	if (m_file == INVALID_HANDLE_VALUE)
 	{

@@ -2,13 +2,13 @@
 
 #include "GhostConnection.h"
 #include "GhostGunnerManager.h"
-#include "Logging/Logger.h"
+#include "DDLogger/DDLogger.h"
 
 bool ConnectionInitializer::InitializeConnection(GhostConnection& ghostConnection) const
 {
 	try
 	{
-		Logger::GetInstance().Log("ConnectionInitializer::InitializeConnection() - Connecting to ghost...");
+		DDLogger::Log("ConnectionInitializer::InitializeConnection() - Connecting to ghost...");
 		ghostConnection.connect();
 
 		WaitForStartup(ghostConnection);
@@ -16,12 +16,12 @@ bool ConnectionInitializer::InitializeConnection(GhostConnection& ghostConnectio
 		Sleep(500);
 		HandleFirmwareUpgrade(ghostConnection);
 
-        Logger::GetInstance().Log("ConnectionInitializer::InitializeConnection() - Success");
+        DDLogger::Log("ConnectionInitializer::InitializeConnection() - Success");
 		return true;
 	}
 	catch (std::exception& e)
 	{
-		Logger::GetInstance().Log("ConnectionInitializer::InitializeConnection() - Connect Failed: " + std::string(e.what()));
+		DDLogger::Log("ConnectionInitializer::InitializeConnection() - Connect Failed: " + std::string(e.what()));
 		return false;
 	}
 }
@@ -40,7 +40,7 @@ void ConnectionInitializer::WaitForStartup(GhostConnection& ghostConnection) con
 			std::string s;
 			if (ghostConnection.ReadLine(s))
 			{
-				Logger::GetInstance().Log("ConnectionInitializer::WaitForStartup() - Line read: " + s);
+				DDLogger::Log("ConnectionInitializer::WaitForStartup() - Line read: " + s);
 			}
 			else if (!(ghostConnection.getState() & Ghost::Status::GS_STARTUP))
 			{
@@ -51,7 +51,7 @@ void ConnectionInitializer::WaitForStartup(GhostConnection& ghostConnection) con
 				auto delta = std::chrono::system_clock::now() - lastReadTime;
 				if (delta > timeout)
 				{
-					Logger::GetInstance().Log("ConnectionInitializer::WaitForStartup() - Connection timeout");
+					DDLogger::Log("ConnectionInitializer::WaitForStartup() - Connection timeout");
 					ghostConnection.reset();
 				}
 
@@ -60,7 +60,7 @@ void ConnectionInitializer::WaitForStartup(GhostConnection& ghostConnection) con
 		}
 		catch (std::exception& e)
 		{
-			Logger::GetInstance().Log("ConnectionInitializer::WaitForStartup() - Exception: " + std::string(e.what()));
+			DDLogger::Log("ConnectionInitializer::WaitForStartup() - Exception: " + std::string(e.what()));
 			ghostConnection.reset();
 			// TODO: Why are we catching this exception?
 		}
@@ -70,12 +70,12 @@ void ConnectionInitializer::WaitForStartup(GhostConnection& ghostConnection) con
 void ConnectionInitializer::HandleFirmwareUpgrade(GhostConnection& ghostConnection) const
 {
 	//const FirmwareVersion firmwareVersion = GhostFirmwareManager::GetInstance().GetFirmwareVersion(ghostConnection);
-	//Logger::GetInstance().Log("ConnectionInitializer::HandleFirmwareUpgrade() - Firmware Version: [" + firmwareVersion.grblVersion + ", " + firmwareVersion.ddVersion + "]");
+	//DDLogger::Log("ConnectionInitializer::HandleFirmwareUpgrade() - Firmware Version: [" + firmwareVersion.grblVersion + ", " + firmwareVersion.ddVersion + "]");
 
 	//if (SettingManager::GetInstance().GetHexLoad())
 	//{
 	//	const std::string resetResponse = ghostConnection.ResetGGVars();
-	//	Logger::GetInstance().Log("ConnectionInitializer::HandleFirmwareUpgrade() - " + resetResponse);
+	//	DDLogger::Log("ConnectionInitializer::HandleFirmwareUpgrade() - " + resetResponse);
 
 	//	SettingManager::GetInstance().SetHexLoad(false);
 	//}

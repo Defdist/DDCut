@@ -2,7 +2,7 @@
 #include "GhostGunnerFinder.h"
 
 #include "GhostException.h"
-#include <Logging/Logger.h>
+#include <DDLogger/DDLogger.h>
 
 #include <regex>
 #include <windows.h>
@@ -140,7 +140,7 @@ std::list<GhostGunner> GhostGunnerFinder::GetAvailableGhostGunners() const
 					if (std::regex_match(nameStr, sm, RXARDUINO))
 					{
 						const std::string path = "\\\\.\\" + sm[1].str();
-						//Logger::GetInstance().Log("GhostGunnerFinder::GetAvailableGhostGunners() - Arduino Found: " + nameStr + " Path: " + path + " Serial Number: " + formattedSerialNumber);
+						//DDLogger::Log("GhostGunnerFinder::GetAvailableGhostGunners() - Arduino Found: " + nameStr + " Path: " + path + " Serial Number: " + formattedSerialNumber);
                         availableGhostGunners.push_back(GhostGunner(path, formattedSerialNumber));
 					}
 				}

@@ -5,7 +5,12 @@
 
 // DDCut Headers
 #include "DDCutDaemon.h"
-#include "Logging/Logger.h"
+#include "DDLogger/DDLogger.h"
+
+void Teardown(void* arg)
+{
+	DDCutDaemon::GetInstance().Shutdown();
+}
 
 void Execute_InitializeDaemon(napi_env env, void* data)
 {
@@ -29,16 +34,21 @@ void Complete_InitializeDaemon(napi_env env, napi_status status, void* data)
 	napi_delete_async_work(env, pContext->m_asyncWork);
 
 	delete pContext;
+
+	napi_add_env_cleanup_hook(env, Teardown, nullptr);
+
+	DDLogger::Log("Complete_InitializeDaemon");
 }
 
 napi_value InitializeDaemon(napi_env env, napi_callback_info info)
 {
+	DDLogger::Log("InitializeDaemon");
 	napi_status status;
 
 	size_t argc = 1;
 	napi_value args[1];
 	status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-	assert(status == napi_ok);
+	ASSERT_STATUS(status);
 
 	napi_value resourceName;
 	const std::string initializeStr = "INITIALIZE";
@@ -77,6 +87,7 @@ napi_value GetDDFile(napi_env env, napi_callback_info info)
 napi_value SetDDFile(napi_env env, napi_callback_info info)
 {
 	napi_status status;
+	napi_value result;
 
 	size_t argc = 1;
 	napi_value args[1];
@@ -86,9 +97,11 @@ napi_value SetDDFile(napi_env env, napi_callback_info info)
 	std::string ddFile;
 	NAPI_GET_STRING(env, args[0], ddFile)
 
-	DDCutDaemon::GetInstance().SetDDFile(ddFile);
+	const bool ddFileSet = DDCutDaemon::GetInstance().SetDDFile(ddFile);
+	status = napi_get_boolean(env, ddFileSet, &result);
+	ASSERT_STATUS(status)
 
-	return nullptr;
+	return result;
 }
 
 napi_value IsValidDDFile(napi_env env, napi_callback_info info)
@@ -156,11 +169,41 @@ napi_value GetAvailableGhostGunners(napi_env env, napi_callback_info info)
 		napi_set_named_property(env, ghostGunnerObj, "path", path);
 		ASSERT_STATUS(status)
 
+		napi_value currentlySelected;
+		status = napi_get_boolean(env, daemon.IsSelectedGhostGunner(ghostGunner), &currentlySelected);
+		ASSERT_STATUS(status)
+		napi_set_named_property(env, ghostGunnerObj, "selected", currentlySelected);
+		ASSERT_STATUS(status)
+
 		status = napi_set_element(env, ghostGunnersArray, i++, ghostGunnerObj);
 		ASSERT_STATUS(status)
 	}
 
 	return ghostGunnersArray;
+}
+
+napi_value SelectGhostGunner(napi_env env, napi_callback_info info)
+{
+	napi_status status;
+	napi_value result;
+
+	size_t argc = 2;
+	napi_value args[2];
+	status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+	ASSERT_STATUS(status)
+
+	std::string path;
+	NAPI_GET_STRING(env, args[0], path)
+
+	std::string serialNumber;
+	NAPI_GET_STRING(env, args[1], serialNumber)
+
+	const GhostGunner ghost(path, serialNumber);
+	const bool selected = DDCutDaemon::GetInstance().SetSelectedGhostGunner(ghost);
+	status = napi_get_boolean(env, selected, &result);
+	ASSERT_STATUS(status)
+
+	return result;
 }
 
 napi_value GetJobs(napi_env env, napi_callback_info info)
@@ -206,6 +249,7 @@ napi_value GetJobs(napi_env env, napi_callback_info info)
 napi_value SelectJob(napi_env env, napi_callback_info info)
 {
 	napi_status status;
+	napi_value result;
 
 	size_t argc = 1;
 	napi_value args[1];
@@ -217,9 +261,12 @@ napi_value SelectJob(napi_env env, napi_callback_info info)
 	ASSERT_STATUS(status)
 
 	DDCutDaemon& daemon = DDCutDaemon::GetInstance();
-	daemon.SelectJob(jobIndex);
+	const bool success = daemon.SelectJob(jobIndex);
 
-	return nullptr;
+	status = napi_get_boolean(env, success, &result);
+	ASSERT_STATUS(status)
+
+	return result;
 }
 
 napi_value GetAllSteps(napi_env env, napi_callback_info info)
@@ -289,22 +336,48 @@ napi_value GetStep(napi_env env, napi_callback_info info)
 
 		if (pOperation->Load())
 		{
-			if (pOperation->GetGCodeFile().getLines().size() > 0)
+			if (pOperation->HasGCodes())
 			{
 				const GCodeFile& gcodeFile = pOperation->GetGCodeFile();
 
-				std::string gcodeStr = "";
-				for (auto iter = gcodeFile.getLines().cbegin(); iter != gcodeFile.getLines().cend(); iter++)
-				{
-					gcodeStr += iter->GetOriginal();
-					gcodeStr += "<br/>"; // TODO: Return array instead, and have front-end add <br/> and step numbering.
-				}
+				napi_value gCodeArr;
+				status = napi_create_array_with_length(env, /*gcodeFile.getLines().size()*/ 0, &gCodeArr);
+				ASSERT_STATUS(status)
 
-				napi_value gcode;
-				status = napi_create_string_utf8(env, gcodeStr.c_str(), gcodeStr.size(), &gcode);
+				//for (size_t i = 0; i < gcodeFile.getLines().size(); i++)
+				//{
+				//	napi_value gCodeStr;
+				//	status = napi_create_string_utf8(env, gcodeFile.getLines()[i].GetOriginal().c_str(), gcodeFile.getLines()[i].GetOriginal().size(), &gCodeStr);
+				//	ASSERT_STATUS(status)
+
+				//	status = napi_set_element(env, gCodeArr, i, gCodeStr);
+				//	ASSERT_STATUS(status)
+				//}
+
+				status = napi_set_named_property(env, stepObj, "GCode", gCodeArr);
 				ASSERT_STATUS(status)
-				status = napi_set_named_property(env, stepObj, "GCode", gcode);
-				ASSERT_STATUS(status)
+			}
+			else
+			{
+				std::vector<Operation> steps = daemon.GetAllSteps();
+				for (size_t i = stepIndex + 1; i < steps.size(); i++)
+				{
+					Operation& step = steps[i];
+					if (step.Load())
+					{
+						if (step.HasGCodes())
+						{
+							napi_value nextMillingStep;
+							status = napi_create_uint32(env, i, &nextMillingStep);
+							ASSERT_STATUS(status)
+
+							status = napi_set_named_property(env, stepObj, "next_milling_step", nextMillingStep);
+							ASSERT_STATUS(status)
+
+							break;
+						}
+					}
+				}
 			}
 
 			if (pOperation->GetImage().size() > 0)
@@ -362,9 +435,22 @@ napi_value GetMillingStatus(napi_env env, napi_callback_info info)
 	DDCutDaemon& daemon = DDCutDaemon::GetInstance();
 	const MillingStatus millingStatus = daemon.GetMillingStatus(stepIndex);
 
-	// TODO: Return status object, instead of just percentage.
-	status = napi_create_uint32(env, millingStatus.GetPercentage(), &result);
+	napi_create_object(env, &result);
+
+	napi_value percentage;
+	status = napi_create_uint32(env, millingStatus.GetPercentage(), &percentage);
 	ASSERT_STATUS(status)
+	status = napi_set_named_property(env, result, "percentage", percentage);
+	ASSERT_STATUS(status)
+
+	if (millingStatus.GetStatus() == EMillingStatus::failed)
+	{
+		napi_value error;
+		status = napi_create_string_utf8(env, millingStatus.GetErrorMessage().c_str(), millingStatus.GetErrorMessage().size(), &error);
+		ASSERT_STATUS(status)
+		status = napi_set_named_property(env, result, "error", error);
+		ASSERT_STATUS(status)
+	}
 
 	return result;
 }
@@ -375,6 +461,42 @@ napi_value EmergencyStop(napi_env env, napi_callback_info info)
 	daemon.EmergencyStop();
 
 	return nullptr;
+}
+
+napi_value GetReadWrites(napi_env env, napi_callback_info info)
+{
+	napi_status status;
+
+	const std::vector<std::pair<ELineType, std::string>> readWrites = DDCutDaemon::GetInstance().GetReadWrites();
+
+	napi_value readWriteArr;
+	status = napi_create_array_with_length(env, readWrites.size(), &readWriteArr);
+	ASSERT_STATUS(status)
+
+	for (size_t i = 0; i < readWrites.size(); i++)
+	{
+		napi_value readWriteObj;
+		status = napi_create_object(env, &readWriteObj);
+		ASSERT_STATUS(status)
+
+		napi_value readWriteType;
+		const std::string lineType = readWrites[i].first == ELineType::READ ? "READ" : "WRITE";
+		status = napi_create_string_utf8(env, lineType.c_str(), lineType.size(), &readWriteType);
+		ASSERT_STATUS(status)
+		status = napi_set_named_property(env, readWriteObj, "TYPE", readWriteType);
+		ASSERT_STATUS(status)
+
+		napi_value readWriteString;
+		status = napi_create_string_utf8(env, readWrites[i].second.c_str(), readWrites[i].second.size(), &readWriteString);
+		ASSERT_STATUS(status)
+		status = napi_set_named_property(env, readWriteObj, "VALUE", readWriteString);
+		ASSERT_STATUS(status)
+
+		status = napi_set_element(env, readWriteArr, i, readWriteObj);
+		ASSERT_STATUS(status)
+	}
+
+	return readWriteArr;
 }
 
 napi_value GetSettings(napi_env env, napi_callback_info info)
@@ -463,7 +585,7 @@ napi_value GetTimeout(napi_env env, napi_callback_info info)
 	DDCutDaemon& daemon = DDCutDaemon::GetInstance();
 
 	napi_value timeout;
-	napi_status status = napi_get_boolean(env, daemon.GetTimeout(), &timeout);
+	napi_status status = napi_create_uint32(env, daemon.GetTimeout(), &timeout);
 	ASSERT_STATUS(status)
 
 	return timeout;
@@ -474,7 +596,7 @@ napi_value GetFeedRate(napi_env env, napi_callback_info info)
 	DDCutDaemon& daemon = DDCutDaemon::GetInstance();
 
 	napi_value feedRate;
-	napi_status status = napi_get_boolean(env, daemon.GetFeedRate(), &feedRate);
+	napi_status status = napi_create_uint32(env, daemon.GetFeedRate(), &feedRate);
 	ASSERT_STATUS(status)
 
 	return feedRate;
@@ -603,15 +725,15 @@ napi_value UploadFirmware(napi_env env, napi_callback_info info)
 	AvailableFirmware firmware;
 
 	napi_value versionProperty;
-	napi_get_named_property(env, args[0], "Version", &versionProperty);
+	napi_get_named_property(env, args[0], "version", &versionProperty);
 	NAPI_GET_STRING(env, versionProperty, firmware.VERSION);
 
 	napi_value descriptionProperty;
-	napi_get_named_property(env, args[0], "Description", &descriptionProperty);
+	napi_get_named_property(env, args[0], "description", &descriptionProperty);
 	NAPI_GET_STRING(env, descriptionProperty, firmware.DESCRIPTION);
 
 	napi_value filesArray;
-	napi_get_named_property(env, args[0], "Files", &filesArray);
+	napi_get_named_property(env, args[0], "files", &filesArray);
 	uint32_t filesLength;
 	napi_get_array_length(env, filesArray, &filesLength);
 
@@ -707,11 +829,11 @@ void Complete_GetAvailableFirmwareUpdates(napi_env env, napi_status status, void
 
 		napi_value version;
 		napi_create_string_utf8(env, availableFirmware.VERSION.c_str(), availableFirmware.VERSION.size(), &version);
-		napi_set_named_property(env, firmwareObj, "Version", version);
+		napi_set_named_property(env, firmwareObj, "version", version);
 
 		napi_value description;
 		napi_create_string_utf8(env, availableFirmware.DESCRIPTION.c_str(), availableFirmware.DESCRIPTION.size(), &description);
-		napi_set_named_property(env, firmwareObj, "Description", description);
+		napi_set_named_property(env, firmwareObj, "description", description);
 
 		napi_value filesArray;
 		napi_create_array_with_length(env, availableFirmware.FILES.size(), &filesArray);
@@ -723,7 +845,7 @@ void Complete_GetAvailableFirmwareUpdates(napi_env env, napi_status status, void
 			napi_set_element(env, filesArray, j, file);
 		}
 
-		napi_set_named_property(env, firmwareObj, "Files", filesArray);
+		napi_set_named_property(env, firmwareObj, "files", filesArray);
 		napi_set_element(env, availableArray, i, firmwareObj);
 	}
 
@@ -735,16 +857,20 @@ void Complete_GetAvailableFirmwareUpdates(napi_env env, napi_status status, void
 	napi_delete_async_work(env, pContext->m_napiContext.m_asyncWork);
 
 	delete pContext;
+
+	DDLogger::Log("Complete_GetAvailableFirmwareUpdates");
 }
 
 napi_value GetAvailableFirmwareUpdates(napi_env env, napi_callback_info info)
 {
+	DDLogger::Log("GetAvailableFirmwareUpdates");
+
 	napi_status status;
 
 	size_t argc = 1;
 	napi_value args[1];
 	status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-	assert(status == napi_ok);
+	ASSERT_STATUS(status);
 
 	GetFirmwareUpdatesContext* pContext = new GetFirmwareUpdatesContext();
 
@@ -812,10 +938,14 @@ void Complete_SendCustomerSupportRequest(napi_env env, napi_status status, void*
 	napi_delete_async_work(env, pContext->m_napiContext.m_asyncWork);
 
 	delete pContext;
+
+	DDLogger::Log("Complete_SendCustomerSupportRequest");
 }
 
 napi_value SendCustomerSupportRequest(napi_env env, napi_callback_info info)
 {
+	DDLogger::Log("SendCustomerSupportRequest");
+
 	napi_status status;
 
 	size_t argc = 4;
@@ -905,11 +1035,22 @@ napi_value SetShowWalkthrough(napi_env env, napi_callback_info info)
 	return nullptr;
 }
 
+napi_value GetLogPath(napi_env env, napi_callback_info info)
+{
+	DDCutDaemon& daemon = DDCutDaemon::GetInstance();
+
+	const std::string logPath = daemon.GetLogPath();
+
+	napi_value logPathStr;
+	napi_status status = napi_create_string_utf8(env, logPath.c_str(), logPath.size(), &logPathStr);
+	ASSERT_STATUS(status)
+
+	return logPathStr;
+}
+
 napi_value Shutdown(napi_env env, napi_callback_info info)
 {
-	Logger::GetInstance().Log("SHUTTING DOWN");
-	DDCutDaemon::GetInstance().EmergencyStop(); // TODO: Call AbortJob, instead.
-	Logger::GetInstance().Flush();
+	//DDCutDaemon::GetInstance().Shutdown();
 
 	return nullptr;
 }
@@ -922,7 +1063,7 @@ napi_value Init(napi_env env, napi_value exports)
 	DDCutDaemon::GetInstance();
 
 	napi_status status;
-	napi_property_descriptor descriptors[30] = {
+	napi_property_descriptor descriptors[33] = {
 		DECLARE_NAPI_METHOD("Initialize", InitializeDaemon),
 		DECLARE_NAPI_METHOD("Shutdown", Shutdown),
 
@@ -932,6 +1073,7 @@ napi_value Init(napi_env env, napi_value exports)
 
 		DECLARE_NAPI_METHOD("GetGhostGunnerStatus", GetGhostGunnerStatus),
 		DECLARE_NAPI_METHOD("GetAvailableGhostGunners", GetAvailableGhostGunners),
+		DECLARE_NAPI_METHOD("SelectGhostGunner", SelectGhostGunner),
 
 		DECLARE_NAPI_METHOD("GetFeedRate", GetFeedRate),
 		DECLARE_NAPI_METHOD("SetFeedRate", SetFeedRate),
@@ -944,6 +1086,7 @@ napi_value Init(napi_env env, napi_value exports)
 		DECLARE_NAPI_METHOD("StartMilling", StartMilling),
 		DECLARE_NAPI_METHOD("GetMillingStatus", GetMillingStatus),
 		DECLARE_NAPI_METHOD("EmergencyStop", EmergencyStop),
+		DECLARE_NAPI_METHOD("GetReadWrites", GetReadWrites),
 
 		// Settings
 		DECLARE_NAPI_METHOD("GetEnableSlider", GetEnableSlider),
@@ -965,10 +1108,13 @@ napi_value Init(napi_env env, napi_value exports)
 
 		// Walkthroughs
 		DECLARE_NAPI_METHOD("ShouldShowWalkthrough", ShouldShowWalkthrough),
-		DECLARE_NAPI_METHOD("SetShowWalkthrough", SetShowWalkthrough)
+		DECLARE_NAPI_METHOD("SetShowWalkthrough", SetShowWalkthrough),
+
+		// Logs
+		DECLARE_NAPI_METHOD("GetLogPath", GetLogPath)
 	};
 
-	status = napi_define_properties(env, exports, 30, descriptors);
+	status = napi_define_properties(env, exports, 33, descriptors);
 	ASSERT_STATUS(status)
 	return exports;
 }

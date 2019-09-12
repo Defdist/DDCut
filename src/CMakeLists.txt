@@ -7,7 +7,7 @@ HunterGate(
     SHA1 "777200954f3851322932f67c782fe92990b32ab2"
 )
 
-set(DDCUT_VERSION 3.0.0)
+set(DDCUT_VERSION 1.0.1)
 project(ddcut VERSION ${DDCUT_VERSION})
 
 if(MSVC)
@@ -24,10 +24,11 @@ add_definitions(-DDDCUT_VERSION="${DDCUT_VERSION}")
 
 file(GLOB DDCUT_SRC
      "${CMAKE_CURRENT_SOURCE_DIR}/DDCutDaemon.cpp"
-	 "${CMAKE_CURRENT_SOURCE_DIR}/Common/*.cpp"
+	# "${CMAKE_CURRENT_SOURCE_DIR}/Common/*.cpp"
 	 "${CMAKE_CURRENT_SOURCE_DIR}/Files/*.cpp"
 	 "${CMAKE_CURRENT_SOURCE_DIR}/Ghost/*.cpp"
-     "${CMAKE_CURRENT_SOURCE_DIR}/Logging/Logger.cpp"
+	 "${CMAKE_CURRENT_SOURCE_DIR}/Ghost/Display/*.cpp"
+     #"${CMAKE_CURRENT_SOURCE_DIR}/Logging/Logger.cpp"
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
@@ -50,13 +51,14 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 add_subdirectory(RestClient)
 add_subdirectory(Settings)
-add_subdirectory(DDUpdater)
+add_subdirectory(Common)
+add_subdirectory(DDLogger)
 
 add_nodejs_module(${PROJECT_NAME} ${DDCUT_SRC} ${OS_SPECIFIC_FILES} "${CMAKE_CURRENT_SOURCE_DIR}/NodeWrapper.cpp")
 target_compile_definitions(${PROJECT_NAME} PRIVATE DDCUT_NODE)
-target_link_libraries(${PROJECT_NAME} ${OS_SPECIFIC_LIBS} minizip::minizip ZLIB::zlib RestClient Settings)
+target_link_libraries(${PROJECT_NAME} ${OS_SPECIFIC_LIBS} minizip::minizip ZLIB::zlib DDCommon DDLogger RestClient Settings)
 
 set(TEST_TARGET_NAME DDCUT_TEST)
 add_executable(${TEST_TARGET_NAME} ${DDCUT_SRC} "${CMAKE_CURRENT_SOURCE_DIR}/DDCutTest.cpp")
 target_compile_definitions(${TEST_TARGET_NAME} PRIVATE DDCUT_TEST)
-target_link_libraries(${TEST_TARGET_NAME} ${OS_SPECIFIC_LIBS} minizip::minizip ZLIB::zlib RestClient Settings)
+target_link_libraries(${TEST_TARGET_NAME} ${OS_SPECIFIC_LIBS} minizip::minizip ZLIB::zlib DDCommon DDLogger RestClient Settings)

@@ -6,11 +6,11 @@
 #include "Files/job.h"
 #include "Ghost/FirmwareVersion.h"
 #include "Ghost/GhostGunner.h"
+#include "Ghost/Display/LineType.h"
 #include "Common/LockUtility.h"
 #include "MillingStatus.h"
 #include "RestClient/AvailableFirmware.h"
 #include "RestClient/CustServiceReqError.h"
-#include "RestClient/SoftwareUpdateStatus.h"
 
 #include <list>
 #include <vector>
@@ -41,6 +41,8 @@ public:
 
 	void Initialize();
 
+	void Shutdown();
+
 
 
 	//////////////////////////////////////////////////////
@@ -70,6 +72,9 @@ public:
 
 	// Sets the selected GhostGunner. Returns true if successful.
 	bool SetSelectedGhostGunner(const GhostGunner& ghostGunner);
+
+	// Determines if the given GhostGunner is the selected one.
+	bool IsSelectedGhostGunner(const GhostGunner& ghostGunner) const;
 
 
 
@@ -140,6 +145,8 @@ public:
 	// Gets the status of the milling for the given step. 0-100 indicates the percentage completed. -1 indicates a failure during upload.
 	MillingStatus GetMillingStatus(const int stepIndex) const;
 
+	std::vector<std::pair<ELineType, std::string>> GetReadWrites() const;
+
 	bool EmergencyStop() const;
 
 
@@ -162,8 +169,7 @@ public:
 	// Sends a customer support request with the given message.
 	std::unique_ptr<CustServiceReqError> SendCustomerSupportRequest(const std::string& email, const std::string& message, const bool includeLogs) const;
 
-	// Checks to see if any updates are available. Returns true if there are.
-	std::unique_ptr<SoftwareUpdateStatus> CheckForUpdates() const;
+	std::string GetLogPath() const;
 
 private:
 	DDCutDaemon();

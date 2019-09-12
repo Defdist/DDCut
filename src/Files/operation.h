@@ -59,6 +59,7 @@ public:
 	inline const std::vector<unsigned char>& GetImageBytes() const { return m_imageBytes; }
 	std::string GetImageBase64() const;
 
+	inline bool HasGCodes() const { return !m_file.empty(); }
 	inline const GCodeFile& GetGCodeFile() const { return m_gcode; }
 
 	static std::regex RXBMP;

@@ -55,5 +55,6 @@ public:
 	GhostException(const EGhostException t);
 	GhostException(const EGhostException t, const std::string& s);
 	const char* what() const noexcept;
-	EGhostException getType();
+	EGhostException getType() const;
+	std::string GetRawDetailMessage() const;
 };

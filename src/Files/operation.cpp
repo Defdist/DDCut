@@ -5,7 +5,7 @@
 #include "DDException.h"
 #include "DDFileManager.h"
 
-#include <Logging/Logger.h>
+#include <DDLogger/DDLogger.h>
 #include <Ghost/GhostRegex.h>
 
 Operation::Operation(const YAMLObject& operationYAML)
@@ -113,7 +113,7 @@ bool Operation::Load()
 		DDFile* pFile = DDFileManager::GetInstance().GetSelectedFile();
 		if (pFile == nullptr)
 		{
-			Logger::GetInstance().Log("Operation::Load - Selected file is null.");
+			DDLogger::Log("Operation::Load - Selected file is null.");
 			return false;
 		}
 
