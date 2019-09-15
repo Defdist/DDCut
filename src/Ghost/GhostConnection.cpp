@@ -121,7 +121,7 @@ void GhostConnection::reconnect()
 
     while(true)
 	{
-		std::string s;
+		std::string s = "";
         if (ReadLine(s))
 		{
         }

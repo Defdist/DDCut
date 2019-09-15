@@ -17,7 +17,6 @@ std::string GhostErrorHandler::GetErrorMessage_Internal(GhostConnection& connect
 	{
 		connection.reset();
 		return "Machine is timed-out due to an operation not completing";
-		//OSUtility::ShowMessageBox("Error", "Machine is timed-out due to an operation not completing");
 	}
 	else if (connection.getState() & Ghost::Status::GS_ERROR)
 	{
@@ -57,8 +56,6 @@ std::string GhostErrorHandler::GetErrorMessage_Internal(GhostConnection& connect
 					locked_message = "Machine is locked due to an error:\n" + connection.GetError();
 				}
 			}
-
-			//OSUtility::ShowMessageBox("Error", locked_message);
 
 			if (connection.GetError().find("Not idle") != std::string::npos)
 			{
@@ -106,7 +103,6 @@ void GhostErrorHandler::HandleFailure(GhostConnection& ghostConnection) const
 	if (ghostConnection.getState() & Ghost::Status::GS_TIMEOUT)
 	{
 		ghostConnection.reset();
-		OSUtility::ShowMessageBox("Error", "Machine is timed-out due to an operation not completing");
 	}
 	else if (ghostConnection.getState() & Ghost::Status::GS_ERROR)
 	{
@@ -147,8 +143,6 @@ void GhostErrorHandler::HandleFailure(GhostConnection& ghostConnection) const
 				}
 			}
 
-			OSUtility::ShowMessageBox("Error", locked_message);
-
 			if (ghostConnection.GetError().find("Not idle") != std::string::npos)
 			{
 				//state.jobIndex = state.jobIndex - 1;
@@ -173,12 +167,10 @@ void GhostErrorHandler::HandleFailure(GhostConnection& ghostConnection) const
 			//string msg = "M101 command failed with result: The frame/lower is out of tolerance for the "+ ghostConnection.GetError().substr(8,1) +" axis\n\nPlease adjust the frame/lower and try again.\n\nIf this error persists you may need to contact Ghost Gunner technical support or run the M100.DD file.";
 
 			const std::string msg = "The frame/lower is out of tolerance for the " + ghostConnection.GetError().substr(8, 1) + " axis\n\nPlease adjust the frame/lower and try again.\n\nIf this error persists you may need to contact Ghost Gunner technical support or run the M100 milling file.\n\nThe workpiece is not positioned within tolerance for the " + ghostConnection.GetError().substr(8, 1) + " axis\n\n Please adjust the workpiece and try again.  ";
-			OSUtility::ShowMessageBox("Operation Aborted", msg);
 		}
 		else
 		{
 			const std::string msg = "Machine is locked due to an error " + ghostConnection.GetError();
-			OSUtility::ShowMessageBox("Operation Aborted", msg);
 		}
 
 		ghostConnection.reset();
@@ -248,7 +240,6 @@ std::string GhostErrorHandler::HandleProbeFailure(GhostConnection& ghostConnecti
 		else
 		{
 			ghostConnection.reset();
-			//OSUtility::ShowMessageBox("DDCut", "Operation Aborted");
 			return "Operation Aborted";
 		}
 	}*/

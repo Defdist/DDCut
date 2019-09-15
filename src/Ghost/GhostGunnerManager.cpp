@@ -101,7 +101,7 @@ std::unique_ptr<GhostException>  GhostGunnerManager::ReadWriteCycle(Job* pJob, O
 			}
 
 			bool sleep = true;
-			std::string s;
+			std::string s = "";
 			while (m_selectedGhostGunner->ReadLine(s))
 			{
 				sleep = false;
@@ -125,7 +125,7 @@ std::unique_ptr<GhostException>  GhostGunnerManager::ReadWriteCycle(Job* pJob, O
 		if (m_selectedGhostGunner->getState() & Ghost::Status::GS_TIMEOUT)
 		{
 			DDLogger::Log("GhostGunnerManager::ReadWriteCycle - Timeout exceeded.");
-			return std::make_unique<GhostException>(GhostException(GhostException::TIMEOUT));
+			return unique::make_unique<GhostException>(GhostException(GhostException::TIMEOUT));
 		}
 		else if (pJob != nullptr && pOperation->GetReset())
 		{
@@ -145,7 +145,7 @@ std::unique_ptr<GhostException>  GhostGunnerManager::ReadWriteCycle(Job* pJob, O
 			// This mess deals with the case when someone has managed to get their machine stuck on a hard limit. It will try to unstick it 3 times.
 			if (hardLimitCount >= 3)
 			{
-				return std::make_unique<GhostException>(GhostException(e));
+				return unique::make_unique<GhostException>(GhostException(e));
 			}
 			else
 			{
@@ -191,25 +191,25 @@ std::unique_ptr<GhostException>  GhostGunnerManager::ReadWriteCycle(Job* pJob, O
 					}
 					else
 					{
-						return std::make_unique<GhostException>(GhostException(e));
+						return unique::make_unique<GhostException>(GhostException(e));
 					}
 				}
 				catch (...)
 				{
 					// Set soft limits
 					HardSend("$20=1");
-					return std::make_unique<GhostException>(GhostException(GhostException::GRBL_ERROR)); // TODO: Determine error
+					return unique::make_unique<GhostException>(GhostException(GhostException::GRBL_ERROR)); // TODO: Determine error
 				}
 			}
 		}
 		else
 		{
-			return std::make_unique<GhostException>(GhostException(e));
+			return unique::make_unique<GhostException>(GhostException(e));
 		}
 	}
 	catch (...)
 	{
-		return std::make_unique<GhostException>(GhostException(GhostException::GRBL_ERROR)); // TODO: Determine error
+		return unique::make_unique<GhostException>(GhostException(GhostException::GRBL_ERROR)); // TODO: Determine error
 	}
 }
 

@@ -3,7 +3,7 @@
 
 #include <DDLogger/DDLogger.h>
 
-#include <filesystem>
+#include <filesystem.h>
 #ifdef _WIN32
 #include <windows.h>
 #elif __APPLE__
@@ -47,11 +47,13 @@ std::string OSUtility::GetExecPath()
     // currently running executable, but we just want the path containing the
     // executable.
     std::string::size_type pos = appPath.find_last_of('/');
+    appPath = appPath.substr(0, pos);
 
-    return appPath.substr(0, pos);
+    pos = appPath.find_last_of('/');
 
+    return appPath.substr(0, pos) + "/Resources/app";
 #else
-	return std::filesystem::current_path().string();
+	return fs::current_path().string();
 #endif
 }
 
@@ -159,39 +161,4 @@ bool OSUtility::ExecuteCommandInNewProcess(const std::string& directory, const s
 #endif
 
     return true;
-}
-
-void OSUtility::ShowMessageBox(const std::string& title, const std::string& message)
-{
-#ifdef _WIN32
-	MessageBox(NULL, message.c_str(), title.c_str(), MB_ICONERROR | MB_OK);
-#elif __APPLE__
-	SInt32 nRes = 0;
-	const void* keys[] = { kCFUserNotificationAlertHeaderKey,
-		kCFUserNotificationAlertMessageKey };
-	const void* vals[] = {
-		CFSTR("Test Foundation Message Box"),
-		CFSTR("Hello, World!")
-	};
-
-	CFDictionaryRef dict = CFDictionaryCreate(0, keys, vals,
-		sizeof(keys) / sizeof(*keys),
-		&kCFTypeDictionaryKeyCallBacks,
-		&kCFTypeDictionaryValueCallBacks);
-
-	CFUserNotificationRef pDlg = CFUserNotificationCreate(kCFAllocatorDefault, 0,
-		kCFUserNotificationPlainAlertLevel,
-		&nRes, dict);
-#endif
-}
-
-bool OSUtility::ShowOkCancelMessageBox(const std::string& title, const std::string& message)
-{
-#ifdef _WIN32
-	return MessageBox(NULL, message.c_str(), title.c_str(), MB_ICONERROR | MB_OKCANCEL | MB_DEFBUTTON2) == IDOK;
-#elif __APPLE__
-
-#endif
-
-	return false;
 }

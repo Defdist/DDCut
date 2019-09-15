@@ -41,7 +41,7 @@ void TestMilling()
 		{
 			std::cout << status.GetErrorMessage() << "\n";
 			break;
-			//throw std::exception("Error");
+			//throw std::exception();
 		}
 
 		std::cout << std::to_string(percentage) << "\n";
@@ -61,7 +61,7 @@ void TestMilling()
 		}
 		else if (percentage == -1)
 		{
-			throw std::exception("Error");
+			throw std::exception();
 		}
 
 		std::cout << std::to_string(percentage) << "\n";
@@ -81,7 +81,7 @@ void TestMilling()
 		}
 		else if (percentage == -1)
 		{
-			throw std::exception("Error");
+			throw std::exception();
 		}
 
 		std::cout << std::to_string(percentage) << "\n";
@@ -101,7 +101,7 @@ void TestMilling()
 		}
 		else if (percentage == -1)
 		{
-			throw std::exception("Error");
+			throw std::exception();
 		}
 
 		std::cout << std::to_string(percentage) << "\n";
@@ -121,7 +121,7 @@ void TestMilling()
 		}
 		else if (percentage == -1)
 		{
-			throw std::exception("Error");
+			throw std::exception();
 		}
 
 		std::cout << std::to_string(percentage) << "\n";
@@ -165,7 +165,7 @@ void TestMillingP80()
 		{
 			std::cout << status.GetErrorMessage() << "\n";
 			break;
-			//throw std::exception("Error");
+			//throw std::exception();
 		}
 
 		std::cout << std::to_string(percentage) << "\n";
@@ -185,7 +185,7 @@ void TestMillingP80()
 		}
 		else if (percentage == -1)
 		{
-			throw std::exception("Error");
+			throw std::exception();
 		}
 
 		std::cout << std::to_string(percentage) << "\n";
@@ -205,7 +205,7 @@ void TestMillingP80()
 		}
 		else if (percentage == -1)
 		{
-			throw std::exception("Error");
+			throw std::exception();
 		}
 
 		std::cout << std::to_string(percentage) << "\n";
@@ -225,7 +225,7 @@ void TestMillingP80()
 		}
 		else if (percentage == -1)
 		{
-			throw std::exception("Error");
+			throw std::exception();
 		}
 
 		std::cout << std::to_string(percentage) << "\n";
@@ -245,7 +245,7 @@ void TestMillingP80()
 		}
 		else if (percentage == -1)
 		{
-			throw std::exception("Error");
+			throw std::exception();
 		}
 
 		std::cout << std::to_string(percentage) << "\n";

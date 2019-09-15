@@ -17,7 +17,6 @@
 #include "RestClient/FileDownloader.h"
 
 #include <thread>
-#include <filesystem>
 
 // TODO: This should always fail gracefully.
 
@@ -119,7 +118,7 @@ void Thread_Connect(DDCutDaemon* pDaemon, std::atomic_bool& shutdown, EGhostGunn
 }
 
 DDCutDaemon::DDCutDaemon()
-	: m_nextFirmwareUpdateId(1)
+	: m_nextFirmwareUpdateId(1), m_shutdown(false)
 {
 }
 
@@ -403,7 +402,7 @@ bool DDCutDaemon::UploadFirmware(const AvailableFirmware& firmware)
 	GhostConnection* pConnection = GhostGunnerManager::GetInstance().GetConnection();
 	if (pConnection != nullptr && !firmware.FILES.empty())
 	{
-		std::thread uploadThread(GhostFirmwareManager::UploadFirmware, std::ref(*pConnection), firmware.FILES[0]);
+		std::thread uploadThread(GhostFirmwareManager::UploadFirmware, std::ref(*pConnection), firmware.FILES[0], m_lockHandle);
 		uploadThread.detach();
 
 		return true;
@@ -422,7 +421,12 @@ FirmwareVersion DDCutDaemon::GetFirmwareVersion() const
 	GhostConnection* connection = GhostGunnerManager::GetInstance().GetConnection();
 	if (m_connectionStatus == connected && connection != nullptr)
 	{
-		return GhostFirmwareManager::GetInstance().GetFirmwareVersion(*connection);
+		if (LockUtility::ObtainLock(m_lockHandle))
+		{
+			FirmwareVersion version = GhostFirmwareManager::GetInstance().GetFirmwareVersion(*connection);
+			LockUtility::ReleaseLock(m_lockHandle);
+			return version;
+		}
 	}
 
 	return FirmwareVersion("", "");
@@ -488,7 +492,7 @@ std::unique_ptr<CustServiceReqError> DDCutDaemon::SendCustomerSupportRequest(con
 	{
 		CustServiceReqError error;
 		error.ERRORS.insert({ "NET_ERROR", "Unable to connect." });
-		return std::make_unique<CustServiceReqError>(std::move(error));
+		return unique::make_unique<CustServiceReqError>(std::move(error));
 	}
 }
 
@@ -519,7 +523,7 @@ std::unique_ptr<Operation> DDCutDaemon::GetStep(const int stepIndex) const
 	Job* pJob = jobManager.GetSelectedJob();
 	if (pJob != nullptr)
 	{
-		return std::make_unique<Operation>(pJob->GetOperation(stepIndex));
+		return unique::make_unique<Operation>(Operation(pJob->GetOperation(stepIndex)));
 	}
 
 	return std::unique_ptr<Operation>(nullptr);

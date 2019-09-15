@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <fstream>
-#include <filesystem>
+#include <filesystem.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -24,12 +24,12 @@ bool FileUtility::MakeDirectory(const std::string& path, const std::string& dir)
 {
     std::error_code errorCode;
     const std::string newDir = path + FILE_SEPARATOR + dir;
-    if (std::filesystem::is_directory(newDir))
+    if (fs::is_directory(newDir))
     {
         return true;
     }
 
-    return std::filesystem::create_directories(newDir, errorCode);
+    return fs::create_directories(newDir, errorCode);
 }
 
 std::string FileUtility::GetFileName(const std::string& path)
@@ -49,7 +49,7 @@ std::string FileUtility::GetFileName(const std::string& path)
 bool FileUtility::GetWorkingDirectory(std::string& currentDirectory)
 {
 #ifdef _WIN32
-	// TODO: Use std::filesystem
+	// TODO: Use fs
     const int bufferSize = MAX_PATH;
     char oldDir[bufferSize];
     if (GetCurrentDirectory(bufferSize, oldDir))

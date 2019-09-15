@@ -14,7 +14,7 @@
 #include <Common/OSUtility.h>
 
 #include <vector>
-#include <filesystem>
+#include <filesystem.h>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -87,7 +87,7 @@ bool GhostFirmwareManager::LoadFirmware(GhostConnection& connection, const std::
     // 4. Determine hexFileName
 	const std::string hexFileName = FileUtility::GetFileName(hexFilePath);
     
-    // 5. Determine path // TODO: Path to what?
+    // 5. Determine path
     const std::string execPath = OSUtility::GetExecPath();
     
 	std::string path = execPath;
@@ -108,7 +108,7 @@ bool GhostFirmwareManager::LoadFirmware(GhostConnection& connection, const std::
     const std::string sysdir = infoBuf;
     
     // 7. Build command
-    const std::string command = sysdir + "\\cmd.EXE /C " + path + "\"\\Drivers\\AVRdude\\avrdude.exe -U flash:w:..\\Firmware\\" + hexFileName + " :i -C \"" + execPath + "\\Drivers\\AVRdude\\avrdude.conf\" -v -p ATMEGA328P -b 115200 -c stk500 -P " + connection.GetPath();
+    const std::string command = sysdir + "\\cmd.EXE /C " + path + "\"\\Drivers\\AVRdude\\avrdude.exe -U flash:w:..\\Firmware\\" + hexFileName + ":i -C \"" + execPath + "\\Drivers\\AVRdude\\avrdude.conf\" -v -p ATMEGA328P -b 115200 -c stk500 -P " + connection.GetPath();
     
     // 8. Execute command in new process
     DDLogger::Log("GhostFirmwareManager::LoadFirmware - Executing Command.");
@@ -132,7 +132,53 @@ bool GhostFirmwareManager::LoadFirmware(GhostConnection& connection, const std::
 	// 11. Clear cache
 	m_cachedFirmwareVersionsBySerialNumber.clear();
 #else
-	// TODO: Implement this for mac
+    // 3. Determine directory of hexFile
+	size_t found = hexFilePath.find_last_of("/\\");
+	const std::string newDirectory = hexFilePath.substr(0, found);
+
+    // 4. Determine hexFileName
+	const std::string hexFileName = FileUtility::GetFileName(hexFilePath);
+    
+    // 5. Determine path
+    const std::string execPath = OSUtility::GetExecPath();
+    
+	std::string path = execPath;
+	found = path.find('/', 0);
+	path.insert(found + 1, "\"");
+
+	size_t next = found + 2;
+	while ((found = path.find('/', next)) != std::string::npos) 
+	{
+		path.insert(found, "\"");
+		path.insert(found + 2, "\"");
+		next = found + 4;
+	}
+    
+    // 7. Build command
+    const std::string command = path + "\"/Drivers/AVRdude/avrdude -U flash:w:" + path + "\"/Firmware/" + hexFileName + ":i -C \"" + execPath + "/Drivers/AVRdude/avrdude.conf\" -v -p ATMEGA328P -b 115200 -c stk500 -P " + connection.GetPath();
+    
+    // 8. Execute command in new process
+    DDLogger::Log("GhostFirmwareManager::LoadFirmware - Executing Command.");
+	DDLogger::Log(command);
+    if (!OSUtility::ExecuteCommandInNewProcess(newDirectory, command))
+	{
+		return false;
+	}
+
+    // 9. Set firmware as loaded // TODO: SetHexLoad/GetHexLoad belongs in FirmwareManager, instead.
+	//SettingManager::GetInstance().SetHexLoad(true);
+	m_uploadStatus = 50;
+	while (m_uploadStatus != 100)
+	{
+		m_uploadStatus += 2;
+		Sleep(50);
+	}
+
+    // 10. Clear currently selected file
+	DDFileManager::GetInstance().SetSelectedFile(nullptr);
+
+	// 11. Clear cache
+	m_cachedFirmwareVersionsBySerialNumber.clear();
 #endif
 
 	// 12. Reconnect
@@ -141,17 +187,18 @@ bool GhostFirmwareManager::LoadFirmware(GhostConnection& connection, const std::
 	return true;
 }
 
-void GhostFirmwareManager::UploadFirmware(GhostConnection& connection, const std::string firmwareURL)
+void GhostFirmwareManager::UploadFirmware(GhostConnection& connection, const std::string firmwareURL, HANDLE ghostLock)
 {
 	GhostFirmwareManager& firmwareManager = GetInstance();
 	firmwareManager.m_uploadStatus = 5;
-
-	std::error_code errorCode;
-	auto currentPath = std::filesystem::current_path(errorCode);
-	if (!errorCode)
+	
+	if (LockUtility::ObtainLock(ghostLock))
 	{
-		const std::string path = currentPath.string() + "\\Firmware\\";
-		std::filesystem::create_directories(path, errorCode);
+		auto currentPath = OSUtility::GetExecPath();
+		const std::string path = currentPath + "/Firmware/";
+
+		std::error_code errorCode;
+		fs::create_directories(path, errorCode);
 		if (!errorCode)
 		{
 			const std::string fileName = firmwareURL.substr(firmwareURL.find_last_of('/') + 1);
@@ -168,10 +215,13 @@ void GhostFirmwareManager::UploadFirmware(GhostConnection& connection, const std
 				if (firmwareManager.LoadFirmware(connection, path + fileName))
 				{
 					firmwareManager.m_uploadStatus = 100;
+					LockUtility::ReleaseLock(ghostLock);
 					return;
 				}
 			}
 		}
+
+		LockUtility::ReleaseLock(ghostLock);
 	}
 
 	firmwareManager.m_uploadStatus = -1;

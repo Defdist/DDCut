@@ -1,0 +1,3 @@
+libavrdude_a-usb_libusb.o: usb_libusb.c ac_cfg.h
+
+ac_cfg.h:

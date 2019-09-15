@@ -1,5 +1,6 @@
 #include "DDRestClient.h"
 #include "RestClient.h"
+#include "Common/defines.h"
 
 #include <iostream>
 #include <istream>
@@ -38,7 +39,7 @@ std::unique_ptr<CustServiceReqError> DDRestClient::SendCustomerServiceRequest(co
 			}
 		}
 
-		return std::make_unique<CustServiceReqError>(error);
+		return unique::make_unique<CustServiceReqError>(error);
 	}
 }
 

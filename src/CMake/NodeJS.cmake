@@ -613,6 +613,7 @@ function(add_nodejs_module NAME)
         PREFIX ""
         SUFFIX ".node"
         MACOSX_RPATH ON
+        INSTALL_NAME_DIR "@executable_path"
         C_VISIBILITY_PRESET hidden
         CXX_VISIBILITY_PRESET hidden
         POSITION_INDEPENDENT_CODE TRUE

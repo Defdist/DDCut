@@ -23,6 +23,7 @@ void GhostConnection::connectOS()
 	}
 
 	struct termios config;
+	bzero(&config, sizeof(config));
 	if (tcgetattr(m_file, &config) < 0)
 	{
 		throw GhostException(GhostException::FAILED_GET);

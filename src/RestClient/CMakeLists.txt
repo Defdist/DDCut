@@ -32,6 +32,6 @@ find_package(jsoncpp CONFIG REQUIRED)
 
 
 # RestClient
-add_library(${TARGET_NAME} SHARED "RestClient.cpp" "DDRestClient.cpp" "FileDownloader.cpp")
+add_library(${TARGET_NAME} STATIC "RestClient.cpp" "DDRestClient.cpp" "FileDownloader.cpp")
 target_compile_definitions(${TARGET_NAME} PRIVATE REST_CLIENT)
 target_link_libraries(${TARGET_NAME} OpenSSL::Crypto OpenSSL::SSL jsoncpp_lib_static)

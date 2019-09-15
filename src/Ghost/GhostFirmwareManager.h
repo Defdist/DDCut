@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FirmwareVersion.h"
+#include "Common/LockUtility.h"
 
 #include <atomic>
 #include <string>
@@ -15,7 +16,7 @@ public:
 	static GhostFirmwareManager& GetInstance();
 
 	FirmwareVersion GetFirmwareVersion(GhostConnection& connection) const;
-	static void UploadFirmware(GhostConnection& connection, const std::string firmwareURL);
+	static void UploadFirmware(GhostConnection& connection, const std::string firmwareURL, HANDLE ghostLock);
 	inline int GetFirmwareUploadStatus() const { return m_uploadStatus.load(); }
 	bool LoadFirmware(GhostConnection& connection, const std::string& hexFile);
 

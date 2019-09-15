@@ -174,7 +174,7 @@ public:
 private:
 	DDCutDaemon();
 	~DDCutDaemon();
-	std::atomic_bool m_shutdown = false;
+	std::atomic_bool m_shutdown;
 	EGhostGunnerStatus m_connectionStatus = notConnected;
 	HANDLE m_lockHandle;
 	int m_nextFirmwareUpdateId;

@@ -5,6 +5,7 @@
 
 #include <list>
 #include <string>
+#include <vector>
 
 // TODO: Clean these up:
 #include <IOKit/IOKitLib.h>
