@@ -26,7 +26,12 @@ function ViewLogs(props) {
     const [logFile, setLogFile] = React.useState("");
 
     function handleOpen(event) {
-        shell.openExternal(logFile);
+        var path = logFile;
+        if (process.platform == 'darwin') {
+            path = 'file://' + logFile;
+        }
+
+        shell.openExternal(path);
         onClose(event);
     }
 

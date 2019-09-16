@@ -6,7 +6,7 @@ import { Titlebar, Color } from 'custom-electron-titlebar';
 import BottomToolbar from './components/BottomToolbar';
 import { version } from '../../package.json';
 import app from 'app';
-
+import os from 'os';
 
 const theme = createMuiTheme({
     palette: {
@@ -142,10 +142,14 @@ export default class App extends React.Component {
         ipcRenderer.removeAllListeners("Milling::Status");
         ipcRenderer.on("Milling::Status", updateMillingStatus.bind(this));
 
-        document.getElementsByClassName('window-appicon')[0].style.width = "20px";
-        document.getElementsByClassName('window-appicon')[0].style.height = "20px";
-        document.getElementsByClassName('window-appicon')[0].style.backgroundSize = "20px 20px";
-        document.getElementsByClassName('window-appicon')[0].style.marginLeft = "5px";
+        if (os.platform != 'darwin') {
+            document.getElementsByClassName('window-appicon')[0].style.width = "20px";
+            document.getElementsByClassName('window-appicon')[0].style.height = "20px";
+            document.getElementsByClassName('window-appicon')[0].style.backgroundSize = "20px 20px";
+            document.getElementsByClassName('window-appicon')[0].style.marginLeft = "5px";
+        } else {
+            document.getElementsByClassName('window-title')[0].style.marginLeft = "55px";
+        }
 
         return (
             <React.Fragment>

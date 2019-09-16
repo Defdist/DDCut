@@ -19,9 +19,11 @@ const createWindow = async () => {
         width: 1205,
         height: 705,
         frame: false,
+        titleBarStyle: 'hidden',
         webPreferences: {
             nodeIntegration: true
-        }
+        },
+        icon: __dirname + '/static/image/logo.ico'
     });
 
     DDController.Initialize();
@@ -78,7 +80,7 @@ app.on('window-all-closed', () => {
     console.log("window-all-closed");
     // On OS X it is common for applications and their menu bar
     // to stay active until the user quits explicitly with Cmd + Q
-    if (process.platform !== 'darwin') {
+    //if (process.platform !== 'darwin') {
         setTimeout(() => {
             DDController.SetWindow(null);
             DDController.Shutdown();
@@ -86,7 +88,7 @@ app.on('window-all-closed', () => {
             console.log("app.quit");
             app.quit();
         }, 0);
-    }
+    //}
 });
 
 app.on('before-quit', (e) => {

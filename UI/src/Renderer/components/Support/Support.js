@@ -125,7 +125,12 @@ class Support extends React.Component {
 		}
 
         function onClickViewManual(event) {
-            shell.openExternal(path.join(__dirname, app.support.manual));
+            var manualPath = path.join(__dirname, app.support.manual);
+            if (process.platform == 'darwin') {
+                manualPath = 'file://' + manualPath;
+            }
+
+            shell.openExternal(manualPath);
             this.handleCloseMenu(event);
         }
 
