@@ -171,7 +171,7 @@ class FirmwareUpdater extends React.Component {
             if (instance.state.showUpdater) {
                 return (
                     <React.Fragment>
-                        <Grid container spacing={8}>
+                        <Grid container spacing={1}>
                             <Grid item xs={3}>
                                 <img src={path.join(__dirname, './static/img/computer.png')} width="128" height="72" style={{ marginTop: '15px' }}/>
                             </Grid>

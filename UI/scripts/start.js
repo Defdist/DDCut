@@ -3,11 +3,13 @@ const electron = require("electron");
 const webpack = require("webpack");
 const config = require("./webpack.app.config");
 
-let app = "ddcut";
+let app = {
+  app: "ddcut"
+};
 for (var i = 0; i < process.argv.length; i++) {
     console.log(process.argv[i]);
     if (process.argv[i].startsWith('--app=')) {
-        app = process.argv[i].substr(6);
+        app.app = process.argv[i].substr(6);
         break;
     }
 }

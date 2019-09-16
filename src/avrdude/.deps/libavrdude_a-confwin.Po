@@ -1,3 +1,0 @@
-libavrdude_a-confwin.o: confwin.c avrdude.h
-
-avrdude.h:

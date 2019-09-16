@@ -1,3 +1,0 @@
-libavrdude_a-ser_avrdoper.o: ser_avrdoper.c ac_cfg.h
-
-ac_cfg.h:

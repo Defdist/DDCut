@@ -1,3 +1,0 @@
-libavrdude_a-ppi.o: ppi.c ac_cfg.h
-
-ac_cfg.h:
